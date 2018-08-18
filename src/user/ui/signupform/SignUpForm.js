@@ -5,12 +5,26 @@ class SignUpForm extends Component {
     super(props)
 
     this.state = {
-      name: ''
+      name: '',
+      email: '',
+      phoneNumber: '',
+      profilePicture: '',
+      userType: 'buyer'
     }
   }
 
   onInputChange(event) {
-    this.setState({ name: event.target.value })
+    console.log(event.target.id);
+    let newState={};
+    newState[event.target.id] = event.target.value;
+    this.setState(newState)
+  }
+
+  onRoleChange(event) {
+    console.log(event.target.value);
+    this.setState({
+      userType: event.target.value
+    });
   }
 
   handleSubmit(event) {
@@ -21,16 +35,39 @@ class SignUpForm extends Component {
       return alert('Please fill in your name.')
     }
 
-    this.props.onSignUpFormSubmit(this.state.name)
+    this.props.onSignUpFormSubmit(
+      this.state.name,
+      this.state.email,
+      this.state.phoneNumber,
+      this.state.profilePicture,
+      this.state.userType
+    );
   }
 
   render() {
     return(
       <form className="pure-form pure-form-stacked" onSubmit={this.handleSubmit.bind(this)}>
         <fieldset>
-          <label htmlFor="name">Name</label>
-          <input id="name" type="text" value={this.state.name} onChange={this.onInputChange.bind(this)} placeholder="Name" />
-          <span className="pure-form-message">This is a required field.</span>
+          <input id="name" type="text" value={this.state.name} onChange={this.onInputChange.bind(this)} placeholder="Name" required/>
+          <input id="email" type="email" value={this.state.email} onChange={this.onInputChange.bind(this)} placeholder="Email" required/>
+          <input id="phoneNumber" type="text" value={this.state.phoneNumber} onChange={this.onInputChange.bind(this)} placeholder="Phone Number" required/>
+          <input id="profilePicture" type="text" value={this.state.profilePicture} onChange={this.onInputChange.bind(this)} placeholder="Profile Image" required/>
+          <br/>
+          <label htmlFor="role">Your Role:</label>
+          <label>
+            <input type="radio" value="buyer" checked={this.state.userType === 'buyer'} onChange={this.onRoleChange.bind(this)} />
+            Buyer
+          </label>
+
+          <label>
+            <input type="radio" value="seller" checked={this.state.userType === 'seller'} onChange={this.onRoleChange.bind(this)} />
+            Seller
+          </label>
+
+          <label>
+            <input type="radio" value="arbiter" checked={this.state.userType === 'arbiter'} onChange={this.onRoleChange.bind(this)} />
+            Arbiter
+          </label>
 
           <br />
 
