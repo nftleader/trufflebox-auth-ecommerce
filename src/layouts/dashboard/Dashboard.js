@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { Table, Button } from 'semantic-ui-react'
+import { Table, Button, Grid } from 'semantic-ui-react'
+import UserDetailedModal from 'components/common/UserDetailedModal'
 
 class Dashboard extends Component {
   constructor(props, { authData }) {
@@ -25,7 +26,16 @@ class Dashboard extends Component {
       address: 'address1',
       userType: 'Owner',
       userState: 'Approved'
-    }]
+    }];
+    
+    this.state.contactInfo = {
+      address: "adskflasjdf",
+      abi: "klsdjflksdf",
+      balance: "0.1 ETH",
+      stores: 97,
+      sellers: 98,
+      admins: 99,
+    }
   }
 
   //{Pending, Approved}
@@ -80,6 +90,7 @@ class Dashboard extends Component {
   onClickUserType(type, email) {
     alert(type + "   " + email);
   }
+
   onClickUserState(state, email) {
     alert(state + "   " + email);
   }
@@ -87,14 +98,21 @@ class Dashboard extends Component {
   render() {
     return(
       <main className="container">
-        <div className="pure-g">
-          <div className="pure-u-1-1">
-            <h1>Dashboard</h1>
-            <p><strong>Congratulations {this.props.authData.name}!</strong> If you're seeing this page, you've logged in with your own smart contract successfully.</p>
+        <div className="row">
+          <div className="col-md-12">
+            <h3>Contact Info</h3>
+            <Grid>
+              {Object.keys(this.state.contactInfo).map((key) => 
+                <Grid.Column width={2} key={key}>
+                  <p as='h5' >{key}: {this.state.contactInfo[key]}</p>
+                </Grid.Column>)}
+            </Grid>
           </div>
+          <hr/>
         </div>
         <div className="row">
           <div className="col-md-12">
+            <h3>User Information</h3>
             <Table celled structured>
               <Table.Header>
                 <Table.Row>
@@ -104,6 +122,7 @@ class Dashboard extends Component {
                   <Table.HeaderCell rowSpan='2'>address</Table.HeaderCell>
                   <Table.HeaderCell rowSpan='2'>User type</Table.HeaderCell>
                   <Table.HeaderCell rowSpan='2'>User state</Table.HeaderCell>
+                  <Table.HeaderCell rowSpan='2'>Details</Table.HeaderCell>
                   <Table.HeaderCell colSpan='2'>Action</Table.HeaderCell>
                 </Table.Row>
                 <Table.Row>
@@ -124,6 +143,7 @@ class Dashboard extends Component {
 
                           {this.showTypeBtns(item.userType, item.email)}
                           {this.showStateBtns(item.userState, item.email)}
+                          <Table.Cell><UserDetailedModal info={item}/></Table.Cell>
                         </Table.Row> )})
               }
                 
