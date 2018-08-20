@@ -5,7 +5,12 @@ class ProfileForm extends Component {
     super(props)
 
     this.state = {
-      name: this.props.name
+      name: this.props.name,
+      email: this.props.email,
+      phoneNumber: this.props.phoneNumber,
+      profilePicture: this.props.profilePicture,
+      userType: this.props.userType,
+      userState: this.props.userState
     }
   }
 
@@ -28,13 +33,13 @@ class ProfileForm extends Component {
     return(
       <form className="pure-form pure-form-stacked" onSubmit={this.handleSubmit.bind(this)}>
         <fieldset>
-          <label htmlFor="name">Name</label>
-          <input id="name" type="text" value={this.state.name} onChange={this.onInputChange.bind(this)} placeholder="Name" />
-          <span className="pure-form-message">This is a required field.</span>
-
-          <br />
-
-          <button type="submit" className="pure-button pure-button-primary">Update</button>
+          <label htmlFor="name">Name: <b>{this.state.name}</b></label>
+          <label htmlFor="email">email: <b>{this.state.email}</b></label>
+          <label htmlFor="phoneNumber">Phone: <b>{this.state.phoneNumber}</b></label>
+          <label htmlFor="profilePicture">Profile Picture: <b>{this.state.profilePicture}</b></label>
+          <label htmlFor="userType">User Type: <b>{this.state.userType}</b></label>
+          <label htmlFor="userState">User State: <b>{this.state.userState}</b></label>
+          <br/>
         </fieldset>
       </form>
     )

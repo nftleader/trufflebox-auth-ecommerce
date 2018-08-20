@@ -170,6 +170,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         );
     }
 
+
     /** @dev Update user State {Pending, Approved}
         * @param _userAddress user address to update
         * @param _userState new user State
@@ -200,41 +201,6 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         emit LogUpdateUserType(_userAddress , _userType);
         users[_userAddress].userType = _userType;
         externalLeave();
-    }
-
-    /** @dev Create new Ecommerce Contract 
-      * @param _name store/market name 
-      * @param _email contact email from store
-      * @param _storeImage IFPS address of the image
-      * @param _arbiter address of the partie which is responsible for escrows for the created store
-      * @return contract address of the store just created and next store number
-      */    
-    function createStore(
-        bytes32 _name, 
-        bytes32 _email, 
-        bytes32 _storeImage,
-        address _arbiter
-    ) 
-        external 
-        payable 
-        onlySeller
-        onlyApprovedState
-        // doesNotHaveStore
-        onlyValidName(_name)
-        onlyValidEmail(_email)
-        onlyValidProfilePicture(_storeImage)
-        requireArbiter(_arbiter)
-        returns (address) 
-    {
-        externalEnter();
-        
-        address newStoreAddress = (new Ecommerce).value(msg.value)(_name, _email, _arbiter, _storeImage);
-        storesCount = storesCount.add(1);
-        storesBySellers[msg.sender] = newStoreAddress;
-        emit LogCreateStore("New store created", newStoreAddress, msg.sender);
-        externalLeave();
-
-        return newStoreAddress;
     }
 
     /** @dev using withdraw pattern to prevent attacks 
