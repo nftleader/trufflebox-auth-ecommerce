@@ -10,6 +10,8 @@ import getWeb3 from './util/web3/getWeb3'
 import App from './App'
 import Home from './layouts/home/Home'
 import Dashboard from './layouts/dashboard/Dashboard'
+import ContactInfo from './layouts/Contact/ContactInfo'
+
 import SignUp from './user/layouts/signup/SignUp'
 import Profile from './user/layouts/profile/Profile'
 import 'semantic-ui-css/semantic.min.css';
@@ -38,8 +40,10 @@ ReactDOM.render((
         <Route path="/" component={App}>
           <IndexRoute component={Home} />
           <Route path="dashboard" component={UserIsAuthenticated(Dashboard)} />
+          <Route path="contactinfo" component={UserIsAuthenticated(ContactInfo)} />
+
           <Route path="signup" component={UserIsNotAuthenticated(SignUp)} />
-          <Route path="profile" component={UserIsAuthenticated(Profile)} />
+          <Route path="profile" component={UserIsAuthenticated(Profile)} />          
         </Route>
       </Router>
     </Provider>

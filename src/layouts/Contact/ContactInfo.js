@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Table, Button } from 'semantic-ui-react'
 import UserDetailedModal from 'components/common/UserDetailedModal'
 
-class Dashboard extends Component {
+class ContactInfo extends Component {
   constructor(props, { authData }) {
     super(props)
     authData = this.props
@@ -143,4 +143,4 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard
+export default ContactInfo
