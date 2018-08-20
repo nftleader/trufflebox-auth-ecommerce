@@ -36,3 +36,11 @@ module.exports = function(deployer) {
 	deployer.deploy(Authentication);
 
 };
+
+/*
+var Authentication_flat = artifacts.require('../contracts_flat/Authentication_flat.sol');
+
+module.exports = function(deployer) {
+	deployer.deploy(Authentication_flat);
+}
+*/

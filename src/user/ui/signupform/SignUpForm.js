@@ -55,17 +55,17 @@ class SignUpForm extends Component {
           <br/>
           <label htmlFor="role">Your Role:</label>
           <label>
-            <input type="radio" value="buyer" checked={this.state.userType === 'buyer'} onChange={this.onRoleChange.bind(this)} />
+            <input type="radio" value="Buyer" checked={this.state.userType === 'Buyer'} onChange={this.onRoleChange.bind(this)} />
             Buyer
           </label>
 
           <label>
-            <input type="radio" value="seller" checked={this.state.userType === 'seller'} onChange={this.onRoleChange.bind(this)} />
+            <input type="radio" value="Seller" checked={this.state.userType === 'Seller'} onChange={this.onRoleChange.bind(this)} />
             Seller
           </label>
 
           <label>
-            <input type="radio" value="arbiter" checked={this.state.userType === 'arbiter'} onChange={this.onRoleChange.bind(this)} />
+            <input type="radio" value="Arbiter" checked={this.state.userType === 'Arbiter'} onChange={this.onRoleChange.bind(this)} />
             Arbiter
           </label>
 
