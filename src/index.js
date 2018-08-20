@@ -10,7 +10,7 @@ import getWeb3 from './util/web3/getWeb3'
 import App from './App'
 import Home from './layouts/home/Home'
 import Dashboard from './layouts/dashboard/Dashboard'
-import ContactInfo from './layouts/Contact/ContactInfo'
+import Orders from './layouts/orders/Orders'
 
 import SignUp from './user/layouts/signup/SignUp'
 import Profile from './user/layouts/profile/Profile'
@@ -40,8 +40,7 @@ ReactDOM.render((
         <Route path="/" component={App}>
           <IndexRoute component={Home} />
           <Route path="dashboard" component={UserIsAuthenticated(Dashboard)} />
-          
-          <Route path="contactinfo" component={UserIsNotAuthenticated(ContactInfo)} />
+          <Route path="orders" component={UserIsAuthenticated(Orders)} />
 
           <Route path="signup" component={UserIsNotAuthenticated(SignUp)} />
           <Route path="profile" component={UserIsAuthenticated(Profile)} />          

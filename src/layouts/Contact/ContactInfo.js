@@ -27,8 +27,7 @@ class ContactInfo extends Component {
         </div>
         <div className="row">
           <div className="col-md-12">
-            {this.state.contactInfo.map(value, index)}
-            <p as='h5'></p>
+            {Object.keys(this.state.contactInfo).map((key) => <p as='h5' key={key}>{key}: {this.state.contactInfo[key]}</p>)}
           </div>
         </div>
       </main>
