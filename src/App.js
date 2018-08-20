@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router'
-import { HiddenOnlyAuth, VisibleOnlyAuth } from './util/wrappers.js'
+import { HiddenOnlyAuth, VisibleOnlyAuth,VisibleOnlySeller, VisibleOnlyBuyer, VisibleOnlyOwner, VisibleOnlyAdmin } from './util/wrappers.js'
 
 // UI Components
 import LoginButtonContainer from './user/ui/loginbutton/LoginButtonContainer'
@@ -26,6 +26,78 @@ class App extends Component {
       </span>
     )
 
+    const OnlySellerLinks = VisibleOnlySeller(()=>
+      <span>
+        <li className="pure-menu-item">
+          <Link to="/dashboard" className="pure-menu-link">SellerHome</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Sellermenu1</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Sellermenu2</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Sellermenu3</Link>
+        </li>
+        <LogoutButtonContainer />
+      </span>
+    )
+
+    const OnlyBuyerLinks = VisibleOnlyBuyer(()=>
+      <span>
+        <li className="pure-menu-item">
+          <Link to="/dashboard" className="pure-menu-link">BuyerHome</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Buyermenu1</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Buyerrmenu2</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Buyermenu3</Link>
+        </li>
+        <LogoutButtonContainer />
+      </span>
+    )
+
+    const OnlyOwnerLinks = VisibleOnlyOwner(()=>
+      <span>
+        <li className="pure-menu-item">
+          <Link to="/dashboard" className="pure-menu-link">OwnerHome</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Ownermenu1</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Ownermenu2</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Ownermenu3</Link>
+        </li>
+        <LogoutButtonContainer />
+      </span>
+    )
+
+    const OnlyAdminLinks = VisibleOnlyAdmin(()=>
+      <span>
+        <li className="pure-menu-item">
+          <Link to="/dashboard" className="pure-menu-link">AdminHome</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Adminmenu1</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Adminmenu2</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link to="/profile" className="pure-menu-link">Adminmenu3</Link>
+        </li>
+        <LogoutButtonContainer />
+      </span>
+    )
+
     const OnlyGuestLinks = HiddenOnlyAuth(() =>
       <span>
         <li className="pure-menu-item">
@@ -41,6 +113,10 @@ class App extends Component {
           <ul className="pure-menu-list navbar-right">
             <OnlyGuestLinks />
             <OnlyAuthLinks />
+            <OnlySellerLinks/>
+            <OnlyBuyerLinks/>
+            <OnlyOwnerLinks/>
+            <OnlyAdminLinks/>
           </ul>
           <Link  className="pure-menu-heading pure-menu-link">markEth</Link>
         </nav>

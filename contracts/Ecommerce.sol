@@ -412,9 +412,4 @@ contract Ecommerce is ReentryProtector {
 
         externalLeave();
     }
-
-
-
-
-    
 }

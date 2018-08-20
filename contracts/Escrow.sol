@@ -53,7 +53,6 @@ contract Escrow  {
         
     }
     
-    
     function releaseAmountToSeller(address _caller) public {
         require(fundsDisbursed == false);
         require(msg.sender == owner);

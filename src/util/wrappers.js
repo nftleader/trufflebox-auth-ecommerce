@@ -34,3 +34,31 @@ export const HiddenOnlyAuth = UserAuthWrapper({
   predicate: user => user.data === null,
   FailureComponent: null
 })
+
+export const VisibleOnlySeller = UserAuthWrapper({
+  authSelector: state => state.user,
+  wrapperDisplayName: 'VisibleOnlySeller',
+  predicate: user => user.usertype === 'seller',
+  FailureComponent: null
+})
+
+export const VisibleOnlyBuyer = UserAuthWrapper({
+  authSelector: state => state.user,
+  wrapperDisplayName: 'VisibleOnlyBuyer',
+  predicate: user => user.usertype === 'buyer',
+  FailureComponent: null
+})
+
+export const VisibleOnlyOwner = UserAuthWrapper({
+  authSelector: state => state.user,
+  wrapperDisplayName: 'VisibleOnlyOwner',
+  predicate: user => user.usertype === 'owner',
+  FailureComponent: null
+})
+
+export const VisibleOnlyAdmin = UserAuthWrapper({
+  authSelector: state => state.user,
+  wrapperDisplayName: 'VisibleOnlyAdmin',
+  predicate: user => user.usertype === 'admin',
+  FailureComponent: null
+})
