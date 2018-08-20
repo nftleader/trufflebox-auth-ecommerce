@@ -13,7 +13,7 @@ class AboutContractAndWebsite extends Component {
     )
   }
 }
-class Home extends Component {
+class BuyHome extends Component {
   render() {
     return(
       <div>
@@ -24,4 +24,4 @@ class Home extends Component {
   }
 }
 
-export default Home
+export default BuyHome
