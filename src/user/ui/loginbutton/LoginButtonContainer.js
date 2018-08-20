@@ -10,7 +10,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onLoginUserClick: (event) => {
       event.preventDefault();
-
       dispatch(loginUser())
     }
   }
