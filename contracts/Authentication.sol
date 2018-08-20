@@ -3,8 +3,9 @@ pragma solidity ^0.4.24;
 import './zeppelin/ownership/Ownable.sol';
 import './zeppelin/lifecycle/Killable.sol';
 import './ReentryProtector.sol';
-import './zeppelin/math/SafeMath.sol';
+import './zeppelin/SafeMath.sol';
 import './Ecommerce.sol';
+
 
 /** @title Authentication contract */
 contract Authentication is Ownable, Killable, ReentryProtector {
@@ -17,10 +18,9 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     // this contract will accept any deposit from any person/contract as a donnation when user is creating a store
     // the balance will be added to the EcommerceFactory balance
     function () public payable {
-        emit LogDonnationReceived(msg.sender , msg.value);
+        emit LogDonnationReceived(owner , msg.value);
     }
     
-
     enum UserType {Buyer, Seller, Arbiter}
     enum UserState {Pending, Approved}
     struct User {
@@ -33,19 +33,22 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         bool exists;
     }
 
-    mapping (address => User) private users;
+    mapping (address => User) public users;
     mapping (address => address) public storesBySellers;
+    mapping (address => uint) public pendingWithdraws;
 
     uint public usersCount;  
     uint public storesCount;   
 
-    modifier onlyExistingUser { require(users[msg.sender].exists, "User is not registered"); _; }
+    modifier onlyExistingUser(address user) { require(users[user].exists, "User is not registered"); _; }
     modifier onlyValidName(bytes32 name) { require(!(name == 0x0), "Invalid name"); _; }
     modifier onlyValidEmail(bytes32 email) { require(!(email == 0x0), "Invalid email"); _; }
     modifier onlyValidPhone(bytes32 phoneNumber) { require(!(phoneNumber == 0x0), "Invalid phone number"); _; }
     modifier onlyValidProfilePicture(bytes32 profilePicture) { require(!(profilePicture == 0x0), "Invalid profile picture"); _; }
-    modifier onlyPendingState { require( users[msg.sender].userState == UserState.Pending, "User not on Pending state."); _; }
+    modifier onlyPendingState(address user) { require( users[user].userState == UserState.Pending, "User not on Pending state."); _; }
     modifier onlyApprovedState() { require( users[msg.sender].userState == UserState.Approved, "User not on Approved state."); _; }
+    modifier onlySeller { require(users[msg.sender].userType == UserType.Seller, "User is not an seller."); _; }
+    modifier doesNotHaveStore { require(storesBySellers[msg.sender] !=  0x0 , "User already has a store"); _; }
     modifier requireArbiter(address _arbiter) { require( users[_arbiter].userType == UserType.Arbiter , "A store require an arbiter."); _; }
 
     event LogDonnationReceived(address sender, uint value);
@@ -61,7 +64,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     function login() 
         external
         view
-        onlyExistingUser
+        onlyExistingUser(msg.sender)
         returns (bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
     {
         return (
@@ -148,7 +151,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         onlyValidEmail(_email)
         onlyValidPhone(_phoneNumber)
         onlyValidProfilePicture(_profilePicture)
-        onlyExistingUser
+        onlyExistingUser(msg.sender)
         returns (bytes32, bytes32, bytes32, bytes32) 
     {
         externalEnter();
@@ -173,9 +176,10 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         */    
     function updateUserState(address _userAddress, UserState _userState) 
         external 
+        payable
         onlyOwner
-        onlyExistingUser
-        onlyPendingState
+        onlyExistingUser(_userAddress)
+        onlyPendingState(_userAddress)
     {
         externalEnter();
         emit LogUpdateUserState(_userAddress , _userState);
@@ -189,6 +193,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         */    
     function updateUserType(address _userAddress, UserType _userType) 
         external 
+        payable
         onlyOwner 
     {
         externalEnter();
@@ -212,7 +217,9 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     ) 
         external 
         payable 
+        onlySeller
         onlyApprovedState
+        // doesNotHaveStore
         onlyValidName(_name)
         onlyValidEmail(_email)
         onlyValidProfilePicture(_storeImage)
@@ -220,6 +227,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         returns (address) 
     {
         externalEnter();
+        
         address newStoreAddress = (new Ecommerce).value(msg.value)(_name, _email, _arbiter, _storeImage);
         storesCount = storesCount.add(1);
         storesBySellers[msg.sender] = newStoreAddress;
@@ -227,6 +235,35 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         externalLeave();
 
         return newStoreAddress;
+    }
+
+    /** @dev using withdraw pattern to prevent attacks 
+    *   @dev user has to request withdraw before properly transfer the value 
+    */
+    function requestWithdraw() 
+        external 
+        payable 
+        onlyOwner
+        returns (bool) 
+    {
+        if (msg.value > 0) {
+            pendingWithdraws[msg.sender] = pendingWithdraws[msg.sender].add(msg.value);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /** @dev user effectivelly request withdraw
+     */
+    function withdraw() 
+        external 
+        payable 
+        onlyOwner
+    {
+        uint amount = pendingWithdraws[msg.sender];
+        pendingWithdraws[msg.sender] = 0;
+        msg.sender.transfer(amount);
     }
 
 }

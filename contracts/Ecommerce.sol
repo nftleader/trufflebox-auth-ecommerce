@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 import './Escrow.sol';
 import './ReentryProtector.sol';
-import './zeppelin/math/SafeMath.sol';
+import './zeppelin/SafeMath.sol';
 
 
 /** @title Ecommerce Contract */
@@ -117,6 +117,7 @@ contract Ecommerce is ReentryProtector {
     event LogEscrowCreated(uint id, address buyer, address seller, address arbiter);
     event LogReleaseAmountToSeller(bytes32 message, uint productId, address caller);
     event LogRefundAmountToBuyer(bytes32 message, uint productId, address caller);
+    event LogWithdraw(bytes32 message, uint productId, address caller);
 
 
    /** @dev Add product to stores mapping - imageLink and descLink are initialized with blanks,
@@ -375,12 +376,19 @@ contract Ecommerce is ReentryProtector {
         externalLeave();
     }
     
-    
-    // TODO: pending withdraw function by store, also from the factory contract
-    // function withDrawFromStore() public onlyStoreOwner {
-        
-    // }
-
+    /** @dev Function to refund amount to buyer
+      * @param _id product index
+      * @return product index
+      */      
+    function withdraw(uint _id)
+        external 
+        productExists(_id)
+    {
+        externalEnter();
+        Escrow(productsEscrow[_id]).withdraw(msg.sender);
+        emit LogWithdraw("Withdraw request", _id, msg.sender);
+        externalLeave();
+    }
 
     /** @dev internal function to instantiate a escrow contract for the purchased product
      * @param _id product index
@@ -404,5 +412,9 @@ contract Ecommerce is ReentryProtector {
 
         externalLeave();
     }
+
+
+
+
     
 }
