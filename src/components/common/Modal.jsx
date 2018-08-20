@@ -1,39 +1,37 @@
-import React from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-
-class ModalExample extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      modal: false
-    };
-
-    this.toggle = this.toggle.bind(this);
-  }
-
-  toggle() {
-    this.setState({
-      modal: !this.state.modal
-    });
-  }
-
+import React from 'react'
+import { Button, Header, Image, Modal, Segment } from 'semantic-ui-react'
+import ItemImage from 'images/image.png'
+class ItemModal extends React.Component {
   render() {
     return (
       <div>
-        <Button color="danger" onClick={this.toggle}>show modal</Button>
-        <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-          <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
-          <ModalBody>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={this.toggle}>Do Something</Button>{' '}
-            <Button color="secondary" onClick={this.toggle}>Cancel</Button>
-          </ModalFooter>
+        <Modal className="productmodal" trigger={<Button className="productname">Product Name</Button>} centered={false}>
+            <Modal.Header>Product Name</Modal.Header>
+            <Modal.Content image>
+                <Image wrapped size='massive' src={ItemImage} />
+                <Modal.Description>
+                    <Header>Product details</Header>
+                    <p as='h5'>Price: 50$</p>
+                    <p as='h5'>Seller: oca</p>
+                    <p as='h5'>Condition: shop</p>
+                    <p>
+                    https://courses.wesbos.com/account/access/5adae24142c2397eec31f28b/view/195950019
+                    https://www.ibm.com/developerworks/library/wa-manage-state-with-redux-p1-david-geary/index.html
+                    (blog)
+
+                    https://www.valentinog.com/blog/react-redux-tutorial-beginners/#React_Redux_tutorial_refactoring_the_reducer  (blog 2018)
+                    </p>
+                </Modal.Description>
+            </Modal.Content>
+            <Modal.Actions>
+                <Button onClick={this.close} positive content="Release"></Button>
+                <Button onClick={this.close} negative content="Redund"></Button>
+                <Button positive icon='checkmark' labelPosition='right' content='BUY' />
+            </Modal.Actions>
         </Modal>
       </div>
     );
   }
 }
 
-export default ModalExample;
+export default ItemModal;

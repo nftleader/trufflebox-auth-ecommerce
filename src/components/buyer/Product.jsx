@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Grid, Menu, Segment, Header } from 'semantic-ui-react'
+import { Grid, Menu, Segment, Header, Pagination } from 'semantic-ui-react'
 import PItem from 'components/common/Item'
 
 class Product extends Component {
@@ -34,6 +34,15 @@ class Product extends Component {
           <Segment>
             <Header as='h3'>Products</Header>
             <PItem/>
+            <Pagination
+              defaultActivePage={1}
+              firstItem={null}
+              lastItem={null}
+              pointing
+              secondary
+              totalPages={3}
+              className="pagination"
+            />
           </Segment>
         </Grid.Column>
       </Grid>

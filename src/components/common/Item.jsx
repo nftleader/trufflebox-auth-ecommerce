@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Item, Header } from 'semantic-ui-react'
 import ItemImage from 'images/image.png'
+import ItemModal from 'components/common/Modal'
 
 class PItem extends Component {
     render() {
@@ -10,7 +11,7 @@ class PItem extends Component {
                     <Item>
                         <Item.Image size='small' src={ItemImage} />
                         <Item.Content>
-                            <Item.Header as='a'>Cute Dog</Item.Header>
+                            <Item.Header><ItemModal/></Item.Header>
                             <Item.Description>
                             <p as='h5'>Price: 50$</p>
                             <p as='h5'>Seller: oca</p>
@@ -22,7 +23,7 @@ class PItem extends Component {
                     <Item>
                         <Item.Image size='small' src={ItemImage} />
                         <Item.Content>
-                            <Item.Header as='a'>Cute Dog</Item.Header>
+                            <Item.Header><ItemModal/></Item.Header>
                             <Item.Description>
                             <p as='h5'>Price: 50$</p>
                             <p as='h5'>Seller: oca</p>
@@ -34,7 +35,7 @@ class PItem extends Component {
                     <Item>
                     <Item.Image size='small' src={ItemImage} />
                         <Item.Content>
-                            <Item.Header as='a'>Cute Dog</Item.Header>
+                            <Item.Header><ItemModal/></Item.Header>
                             <Item.Description>
                             <p as='h5'>Price: 50$</p>
                             <p as='h5'>Seller: oca</p>
@@ -43,6 +44,7 @@ class PItem extends Component {
                         </Item.Content>
                     </Item>
                 </Item.Group>
+                
             </div>
         )
     }
