@@ -1,7 +1,8 @@
 pragma solidity ^0.4.24;
-import './Escrow.sol';
-import './ReentryProtector.sol';
-import './zeppelin/SafeMath.sol';
+
+import "./Escrow.sol";
+import "./ReentryProtector.sol";
+import "./zeppelin/SafeMath.sol";
 
 
 /** @title Ecommerce Contract */
@@ -9,16 +10,21 @@ contract Ecommerce is ReentryProtector {
     
     using SafeMath for uint256;
 
-    constructor (
+    function  addStore(
         bytes32 _name, 
         bytes32 _email,
         address _arbiter,
-        bytes32 _storeFrontImage
-    ) 
-        public 
+        bytes32 _storeFrontImage,
+        address _selleraddress
+    )
+        external 
         payable
+        returns (bool)
     {
-        storesAccount[tx.origin] = Store(tx.origin, _name, _email, _arbiter, _storeFrontImage, msg.value, 0);
+        externalEnter();
+        storesAccount[_selleraddress] = Store(_selleraddress, _name, _email, _arbiter, _storeFrontImage, 0/*msg.value*/, 0);
+        externalLeave();
+        return true;
     }
 
     // ===================================================
@@ -27,7 +33,7 @@ contract Ecommerce is ReentryProtector {
     // this contract will accept any deposit from any person/contract as a donnation when user is creating a store
     // the balance will be added to the EcommerceFactory balance
     function () public payable {
-        emit LogDonnationReceived(msg.sender , msg.value);
+        emit LogDonnationReceived(msg.sender, msg.value);
     }
     
     mapping (address => Store) public storesAccount;             // Stores by addresses
@@ -149,8 +155,8 @@ contract Ecommerce is ReentryProtector {
             storesProductCount[msg.sender], 
             _name, 
             _category, 
-            '', 
-            '', 
+            "", 
+            "", 
             _startTime, 
             _price, 
             0, 
@@ -162,7 +168,7 @@ contract Ecommerce is ReentryProtector {
         stores[msg.sender][storesProductCount[msg.sender]] = product;
         storesByProductId[storesProductCount[msg.sender]] = msg.sender;
         storesProductCount[msg.sender] = storesProductCount[msg.sender].add(1);        
-        emit LogForSale('Product for Sale:', storesProductCount[msg.sender]);
+        emit LogForSale("Product for Sale:", storesProductCount[msg.sender]);
         externalLeave();
     }
 
@@ -181,7 +187,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[storesByProductId[_id]][_id].imageLink = _imageLink;
-        emit LogForSale('Product image updated:', storesProductCount[msg.sender]);
+        emit LogForSale("Product image updated:", storesProductCount[msg.sender]);
         externalLeave();
     }
 
@@ -200,7 +206,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[storesByProductId[_id]][_id].descLink = _descLink;
-        emit LogForSale('Product description updated:', storesProductCount[msg.sender]);
+        emit LogForSale("Product description updated:", storesProductCount[msg.sender]);
         externalLeave();
     }
 
@@ -217,7 +223,7 @@ contract Ecommerce is ReentryProtector {
         externalEnter();
         stores[msg.sender][_id].productState = ProductState.Deleted;
         storesProductCount[msg.sender] = storesProductCount[msg.sender].sub(1);
-        emit LogProductRemoved('Product removed:', _id);
+        emit LogProductRemoved("Product removed:", _id);
         externalLeave();
     }
     

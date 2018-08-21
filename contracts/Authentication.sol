@@ -1,16 +1,21 @@
 pragma solidity ^0.4.24;
 
-import './zeppelin/ownership/Ownable.sol';
-import './zeppelin/lifecycle/Killable.sol';
-import './ReentryProtector.sol';
-import './zeppelin/SafeMath.sol';
-import './Ecommerce.sol';
+import "./zeppelin/ownership/Ownable.sol";
+import "./zeppelin/lifecycle/Killable.sol";
+import "./ReentryProtector.sol";
+import "./zeppelin/SafeMath.sol";
+import "./Ecommerce.sol";
 
 
 /** @title Authentication contract */
 contract Authentication is Ownable, Killable, ReentryProtector {
-
     using SafeMath for uint256;
+
+    Ecommerce ecommerce;
+
+    constructor(address ecommerceAddress) public payable{
+        ecommerce = Ecommerce(ecommerceAddress);
+    }
 
     // ===================================================
     // Fallback
@@ -18,10 +23,10 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     // this contract will accept any deposit from any person/contract as a donnation when user is creating a store
     // the balance will be added to the EcommerceFactory balance
     function () public payable {
-        emit LogDonnationReceived(owner , msg.value);
+        emit LogDonnationReceived(owner, msg.value);
     }
     
-    enum UserType {Buyer, Seller, Arbiter}
+    enum UserType {Buyer, Seller, Arbiter, Owner}
     enum UserState {Pending, Approved}
     struct User {
         bytes32 name;
@@ -64,17 +69,43 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     function login() 
         external
         view
-        onlyExistingUser(msg.sender)
+        // onlyExistingUser(msg.sender)
         returns (bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
     {
-        return (
-            users[msg.sender].name,
-            users[msg.sender].email,
-            users[msg.sender].phoneNumber,
-            users[msg.sender].profilePicture,
-            users[msg.sender].userType,
-            users[msg.sender].userState
-        );
+        if (users[msg.sender].exists) {
+            return (
+                    users[msg.sender].name,
+                    users[msg.sender].email,
+                    users[msg.sender].phoneNumber,
+                    users[msg.sender].profilePicture,
+                    users[msg.sender].userType,
+                    users[msg.sender].userState
+                );
+        }
+        if (owner == msg.sender) 
+        {
+            return (
+                stringToBytes32("Owner"),
+                stringToBytes32("owner@owner.com"),
+                stringToBytes32("12345678"),
+                stringToBytes32("ownerImage"),
+                UserType.Owner,
+                UserState.Approved
+            );
+        } 
+    }
+
+    /** @dev convert strint to bytes32
+     */
+    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
     }
 
     /** @dev signup function to register the user
@@ -230,6 +261,45 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         uint amount = pendingWithdraws[msg.sender];
         pendingWithdraws[msg.sender] = 0;
         msg.sender.transfer(amount);
+    }
+
+    /** @dev Create new Ecommerce Contract 
+      * @param _name store/market name 
+      * @param _email contact email from store
+      * @param _storeImage IFPS address of the image
+      * @param _arbiter address of the partie which is responsible for escrows for the created store
+      * @return contract address of the store just created and next store number
+      */    
+    function createStore(
+        bytes32 _name, 
+        bytes32 _email, 
+        bytes32 _storeImage,
+        address _arbiter
+    ) 
+        external 
+        payable 
+        onlySeller
+        onlyApprovedState
+        // doesNotHaveStore
+        onlyValidName(_name)
+        onlyValidEmail(_email)
+        onlyValidProfilePicture(_storeImage)
+        requireArbiter(_arbiter)
+        returns (bool) 
+    {
+        externalEnter();
+        
+        //address newStoreAddress = (new Ecommerce).value(msg.value)(_name, _email, _arbiter, _storeImage);
+        bool addStoreResult = ecommerce.addStore(_name, _email, _arbiter, _storeImage, msg.sender);
+        if(addStoreResult == false)
+            return false;
+        storesCount = storesCount.add(1);
+        //storesBySellers[msg.sender] = newStoreAddress;
+        storesBySellers[msg.sender] = msg.sender;   //value doesn't matter
+        emit LogCreateStore("New store created", msg.sender, msg.sender);
+        externalLeave();
+
+        return true;
     }
 
 }

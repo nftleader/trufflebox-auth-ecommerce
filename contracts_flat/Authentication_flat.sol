@@ -218,7 +218,7 @@ contract Escrow  {
     }
     
     
-    function escrowDetails() view public returns (address, address, address, bool, uint, uint) {
+    function escrowDetails() public view returns (address, address, address, bool, uint, uint) {
         return (buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount);
         
     }
@@ -284,16 +284,21 @@ contract Ecommerce is ReentryProtector {
     
     using SafeMath for uint256;
 
-    constructor (
+    function  addStore(
         bytes32 _name, 
         bytes32 _email,
         address _arbiter,
-        bytes32 _storeFrontImage
-    ) 
-        public 
+        bytes32 _storeFrontImage,
+        address _selleraddress
+    )
+        external 
         payable
+        returns (bool)
     {
-        storesAccount[tx.origin] = Store(tx.origin, _name, _email, _arbiter, _storeFrontImage, msg.value, 0);
+        externalEnter();
+        storesAccount[_selleraddress] = Store(_selleraddress, _name, _email, _arbiter, _storeFrontImage, 0/*msg.value*/, 0);
+        externalLeave();
+        return true;
     }
 
     // ===================================================
@@ -302,7 +307,7 @@ contract Ecommerce is ReentryProtector {
     // this contract will accept any deposit from any person/contract as a donnation when user is creating a store
     // the balance will be added to the EcommerceFactory balance
     function () public payable {
-        emit LogDonnationReceived(msg.sender , msg.value);
+        emit LogDonnationReceived(msg.sender, msg.value);
     }
     
     mapping (address => Store) public storesAccount;             // Stores by addresses
@@ -424,8 +429,8 @@ contract Ecommerce is ReentryProtector {
             storesProductCount[msg.sender], 
             _name, 
             _category, 
-            '', 
-            '', 
+            "", 
+            "", 
             _startTime, 
             _price, 
             0, 
@@ -437,7 +442,7 @@ contract Ecommerce is ReentryProtector {
         stores[msg.sender][storesProductCount[msg.sender]] = product;
         storesByProductId[storesProductCount[msg.sender]] = msg.sender;
         storesProductCount[msg.sender] = storesProductCount[msg.sender].add(1);        
-        emit LogForSale('Product for Sale:', storesProductCount[msg.sender]);
+        emit LogForSale("Product for Sale:", storesProductCount[msg.sender]);
         externalLeave();
     }
 
@@ -456,7 +461,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[storesByProductId[_id]][_id].imageLink = _imageLink;
-        emit LogForSale('Product image updated:', storesProductCount[msg.sender]);
+        emit LogForSale("Product image updated:", storesProductCount[msg.sender]);
         externalLeave();
     }
 
@@ -475,7 +480,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[storesByProductId[_id]][_id].descLink = _descLink;
-        emit LogForSale('Product description updated:', storesProductCount[msg.sender]);
+        emit LogForSale("Product description updated:", storesProductCount[msg.sender]);
         externalLeave();
     }
 
@@ -492,7 +497,7 @@ contract Ecommerce is ReentryProtector {
         externalEnter();
         stores[msg.sender][_id].productState = ProductState.Deleted;
         storesProductCount[msg.sender] = storesProductCount[msg.sender].sub(1);
-        emit LogProductRemoved('Product removed:', _id);
+        emit LogProductRemoved("Product removed:", _id);
         externalLeave();
     }
     
@@ -698,8 +703,13 @@ contract Ecommerce is ReentryProtector {
 
 /** @title Authentication contract */
 contract Authentication is Ownable, Killable, ReentryProtector {
-
     using SafeMath for uint256;
+
+    Ecommerce ecommerce;
+
+    constructor(address ecommerceAddress) public payable{
+        ecommerce = Ecommerce(ecommerceAddress);
+    }
 
     // ===================================================
     // Fallback
@@ -707,7 +717,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     // this contract will accept any deposit from any person/contract as a donnation when user is creating a store
     // the balance will be added to the EcommerceFactory balance
     function () public payable {
-        emit LogDonnationReceived(owner , msg.value);
+        emit LogDonnationReceived(owner, msg.value);
     }
     
     enum UserType {Buyer, Seller, Arbiter}
@@ -919,6 +929,45 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         uint amount = pendingWithdraws[msg.sender];
         pendingWithdraws[msg.sender] = 0;
         msg.sender.transfer(amount);
+    }
+
+    /** @dev Create new Ecommerce Contract 
+      * @param _name store/market name 
+      * @param _email contact email from store
+      * @param _storeImage IFPS address of the image
+      * @param _arbiter address of the partie which is responsible for escrows for the created store
+      * @return contract address of the store just created and next store number
+      */    
+    function createStore(
+        bytes32 _name, 
+        bytes32 _email, 
+        bytes32 _storeImage,
+        address _arbiter
+    ) 
+        external 
+        payable 
+        onlySeller
+        onlyApprovedState
+        // doesNotHaveStore
+        onlyValidName(_name)
+        onlyValidEmail(_email)
+        onlyValidProfilePicture(_storeImage)
+        requireArbiter(_arbiter)
+        returns (bool) 
+    {
+        externalEnter();
+        
+        //address newStoreAddress = (new Ecommerce).value(msg.value)(_name, _email, _arbiter, _storeImage);
+        bool addStoreResult = ecommerce.addStore(_name, _email, _arbiter, _storeImage, msg.sender);
+        if(addStoreResult == false)
+            return false;
+        storesCount = storesCount.add(1);
+        //storesBySellers[msg.sender] = newStoreAddress;
+        storesBySellers[msg.sender] = msg.sender;   //value doesn't matter
+        emit LogCreateStore("New store created", msg.sender, msg.sender);
+        externalLeave();
+
+        return true;
     }
 
 }
