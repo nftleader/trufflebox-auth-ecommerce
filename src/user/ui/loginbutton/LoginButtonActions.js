@@ -5,10 +5,18 @@ import store from '../../../store'
 const contract = require('truffle-contract')
 
 export const USER_LOGGED_IN = 'USER_LOGGED_IN'
+export const OWNER_LOGGED_IN = 'OWNER_LOGGED_IN'
 function userLoggedIn(user) {
   return {
     type: USER_LOGGED_IN,
     payload: user
+  }
+}
+
+function ownerLoggedIn(data) {
+  return {
+    type: OWNER_LOGGED_IN,
+    payload: data
   }
 }
 
@@ -41,7 +49,7 @@ export function loginUser() {
           .then(function(result) {
             // If no error, login user.
             const [ name, email, phoneNumber, profilePicture, userType, userState ] = result;
-            let userTypes = ["Buyer", "Seller", "Arbiter", "Admin"];
+            let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
             let userStatus = ["Pending", "Approved"];
             let obj = {
               name: web3.toUtf8(name),
@@ -53,6 +61,19 @@ export function loginUser() {
             };
             console.log(obj);
             dispatch(userLoggedIn(obj));
+            if( obj.userType === "Buyer"){
+              //dispatch(userLoggedIn(obj));
+            }else if( obj.userType === "Seller"){
+              //dispatch(userLoggedIn(obj));
+            }else if( obj.userType === "Arbiter"){
+              //dispatch(userLoggedIn(obj));
+            }else if( obj.userType === "Owner"){
+              //dispatch(userLoggedIn(obj));
+              let OwnerObj = {
+                data:'test data'
+              };
+              dispatch(ownerLoggedIn(OwnerObj));
+            }
 
             // Used a manual redirect here as opposed to a wrapper.
             // This way, once logged in a user can still access the home page.

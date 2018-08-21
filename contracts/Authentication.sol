@@ -214,7 +214,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         onlyPendingState(_userAddress)
     {
         externalEnter();
-        emit LogUpdateUserState(_userAddress , _userState);
+        emit LogUpdateUserState(_userAddress, _userState);
         users[_userAddress].userState = _userState;
         externalLeave();
     }
@@ -223,7 +223,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         * @param _userAddress  user address to update
         * @param _userType new user type
         */    
-    function updateUserType(address _userAddress, UserType _userType) 
+    function updateUserType (address _userAddress, UserType _userType) 
         external 
         payable
         onlyOwner 
