@@ -1,4 +1,3 @@
-/*
 var Ownable = artifacts.require("./zeppelin/ownership/Ownable.sol");
 var Killable = artifacts.require("./zeppelin/lifecycle/Killable.sol");
 var SafeMath = artifacts.require("./zeppelin/math/SafeMath.sol");
@@ -7,34 +6,32 @@ var Authentication = artifacts.require("./Authentication.sol");
 var Ecommerce = artifacts.require("./Ecommerce.sol");
 var Escrow = artifacts.require("./Escrow.sol");
 
-module.exports = function(deployer) {
+module.exports =  function(deployer) {
   deployer.deploy(Ownable);
-  deployer.autolink();
   deployer.deploy(Killable);
-  deployer.autolink();
   deployer.deploy(SafeMath);
-  deployer.autolink();
   deployer.deploy(ReentryProtector);
-  deployer.autolink();
-  deployer.deploy(Authentication);
-  deployer.autolink();
-  deployer.deploy(Ecommerce);
-  deployer.autolink();
-  deployer.deploy(Escrow);
-};
-*/
+  deployer.deploy(Escrow, 0, "0x0", "0x0", "0x0");
 
-var Ownable = artifacts.require('./zeppelin/ownership/Ownable.sol');
-var Killable = artifacts.require('./zeppelin/lifecycle/Killable.sol');
-var Authentication = artifacts.require('./Authentication.sol');
+  deployer.link(SafeMath, Ecommerce);
+  deployer.link(ReentryProtector, Ecommerce);
+  deployer.link(Escrow, Ecommerce);
 
-module.exports = function(deployer) {
-	deployer.deploy(Ownable);
-	deployer.link(Ownable, Killable);
-	deployer.deploy(Killable);
-	deployer.link(Killable, Authentication);
-	deployer.deploy(Authentication);
+  deployer.link(Ownable, Authentication);
+  deployer.link(Killable, Authentication);
+  deployer.link(SafeMath, Authentication);
+  deployer.link(ReentryProtector, Authentication);
+  deployer.link(Ecommerce, Authentication);
 
+
+  deployer.deploy(Ecommerce).then(function(depEcommerce) {
+    console.log("Ecommerce Address : ", depEcommerce.address);
+    console.log("deployer : ", deployer);
+    return deployer.deploy(Authentication, depEcommerce.address /*, {gas:100000000}*/);
+  }).then((ans) => {
+    //if we don't process this then, auth.sol doesn't migrate
+    return ans;
+  });
 };
 
 /*

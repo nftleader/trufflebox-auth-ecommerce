@@ -30,8 +30,8 @@ export function signUpUser(name, email, phone, profile, usertype) {
 
           // Attempt to sign up user.
           let numUserType = 2;
-          if(usertype == 'buyer')   numUserType = 0;
-          else if(usertype == 'seller')   numUserType = 1;
+          if(usertype == 'Buyer')   numUserType = 0;
+          else if(usertype == 'Seller')   numUserType = 1;
           authenticationInstance.signup(name, email, phone, profile, numUserType, {from: coinbase})
           .then(function(result) {
             // If no error, login user.

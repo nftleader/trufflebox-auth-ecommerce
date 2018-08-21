@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './zeppelin/SafeMath.sol';
+import "./zeppelin/SafeMath.sol";
 
 
 /** @title Escrow Contract - used to control money release on a market. */
@@ -48,7 +48,7 @@ contract Escrow  {
     }
     
     
-    function escrowDetails() view public returns (address, address, address, bool, uint, uint) {
+    function escrowDetails() public view returns (address, address, address, bool, uint, uint) {
         return (buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount);
         
     }

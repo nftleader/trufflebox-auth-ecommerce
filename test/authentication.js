@@ -1,7 +1,6 @@
-
 const Authentication = artifacts.require('./Authentication.sol');
 import expectThrow from './helpers/expectThrow';
-import { catchRevert } from './helpers/exceptions'
+import { catchRevert } from './helpers/exceptions';
 
 contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 	let authentication;
@@ -28,6 +27,13 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 	// 	assert.equal(web3.eth.getBalance(authAddress).toNumber(), web3.toWei(1));
 	// });
 
+	it('login as Owner', async () => {
+		const [ name, email, phoneNumber, profilePicture, userType, userState ]  = await authentication.login({ from: owner });
+		const expectedUserType = 3; // Owner
+
+		assert.equal(userType.c[0] ,expectedUserType, 'Owner coult not log in.');
+	});
+
 	it('should sign up and log in as a Buyer', async () => {
 		const expectedName = 'Buyer';
 		const expectedEmail = 'buyer@test.com';
@@ -45,7 +51,9 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 			{ from: buyer }
 		);
 
-		const [ name, email, phoneNumber, profilePicture, userType, userState ] = await(authentication.login({ from: buyer }));
+		const [ name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.login({
+			from: buyer
+		});
 
 		assert.equal(expectedName, web3.toUtf8(name), 'User name does not match.');
 		assert.equal(expectedEmail, web3.toUtf8(email), 'User email does not match.');
@@ -100,13 +108,14 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 			expectedUserType,
 			{ from: arbiter }
 		);
-		
+
 		await authentication.updateUserState(arbiter, expectedUserState, { from: owner });
 
-		const [name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.users.call(arbiter);
+		const [ name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.users.call(
+			arbiter
+		);
 		assert.equal(expectedUserState, userState.c[0], 'Arbiter not approved');
 	});
-
 
 	it('create/aprove Seller and let him create a Store', async () => {
 		let expectedName = 'Authorized Seller';
@@ -124,10 +133,12 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 			expectedUserType,
 			{ from: seller }
 		);
-		
+
 		await authentication.updateUserState(seller, expectedUserState, { from: owner });
 
-		const [name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.users.call(seller);
+		const [ name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.users.call(
+			seller
+		);
 		assert.equal(expectedUserState, userState.c[0], 'Seller not approved');
 
 		// create an arbiter for the store
@@ -153,7 +164,9 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 		const storeImage = 'image';
 		const storeArbiter = arbiter;
 
-		const newStoreAddress = await authentication.createStore(storeName, storeEmail, storeImage, storeArbiter, {from: seller});
+		const newStoreAddress = await authentication.createStore(storeName, storeEmail, storeImage, storeArbiter, {
+			from: seller
+		});
 
 		const storeAddress = await authentication.storesBySellers.call(seller);
 
@@ -162,7 +175,4 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 
 		// assert.equal(newStoreAddress, storeAddress, 'Store address does not match created address');
 	});
-
-	
-
 });
