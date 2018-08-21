@@ -9,7 +9,7 @@ class SignUpForm extends Component {
       email: '',
       phoneNumber: '',
       profilePicture: '',
-      userType: 'buyer'
+      userType: 'Buyer'
     }
   }
 
