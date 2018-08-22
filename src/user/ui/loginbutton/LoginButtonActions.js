@@ -13,11 +13,45 @@ function userLoggedIn(user) {
   }
 }
 
-function ownerLoggedIn(data) {
-  return {
+let getUserList = async function(authenticationInstance){
+  let OwnerObj = {
     type: OWNER_LOGGED_IN,
-    payload: data
+    payload:{
+      userCount: 0,
+      userData:[]
+    }
+  };
+
+  const usersCountBigNumber = await authenticationInstance.usersCount();
+  let usersCount = usersCountBigNumber.toNumber();
+  console.log("***********  users count: ", usersCount, usersCountBigNumber);
+  let web3 = store.getState().web3.web3Instance;
+  OwnerObj.payload.userCount = usersCount;
+  for(let i = 1; i <= usersCount; i++){
+    try{
+      const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authenticationInstance.getUser(i);
+      let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
+      let userStatus = ["Pending", "Approved"];
+      let obj = {
+        id : i,
+        address: address,
+        name: web3.toUtf8(name),
+        email: web3.toUtf8(email),
+        phoneNumber:web3.toUtf8(phoneNumber),
+        profilePicture: web3.toUtf8(profilePicture),
+        userType: userTypes[userType.toNumber()],
+        userState: userStatus[userState.toNumber()]
+      };
+      console.log("***********  users obj: ", obj);
+      OwnerObj.payload.userData.push(obj);
+    }catch(err){
+      console.log("missing user id ", i);
+      console.log("error ", err);
+      continue;
+    }
   }
+  console.log("***********  return obj: ", OwnerObj);
+  return OwnerObj;
 }
 
 export function loginUser() {
@@ -69,11 +103,11 @@ export function loginUser() {
               //dispatch(userLoggedIn(obj));
             }else if( obj.userType === "Owner"){
               //dispatch(userLoggedIn(obj));
-              let OwnerObj = {
-                data:'test data'
-              };
-              dispatch(ownerLoggedIn(OwnerObj));
+              return getUserList(authenticationInstance);
             }
+
+          }).then(function(result){ //finshed getting product
+            if(result)  dispatch(result);
 
             // Used a manual redirect here as opposed to a wrapper.
             // This way, once logged in a user can still access the home page.
@@ -85,10 +119,12 @@ export function loginUser() {
             }
 
             return browserHistory.push('/dashboard')
+
           })
-          .catch(function(result) {
+          .catch(function(error) {
             // If error, go to signup page.
             console.error('Wallet ' + coinbase + ' does not have an account!')
+            console.error('Error obj ', error)
 
             return browserHistory.push('/signup')
           })

@@ -1,12 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "./Escrow.sol";
+import "./zeppelin/ownership/Ownable.sol";
 import "./ReentryProtector.sol";
 import "./zeppelin/SafeMath.sol";
+import "./Escrow.sol";
 
 
 /** @title Ecommerce Contract */
-contract Ecommerce is ReentryProtector {
+contract Ecommerce is Ownable, ReentryProtector {
     
     using SafeMath for uint256;
 
@@ -15,14 +16,17 @@ contract Ecommerce is ReentryProtector {
         bytes32 _email,
         address _arbiter,
         bytes32 _storeFrontImage,
-        address _selleraddress
+        address _sellerAddress
     )
         external 
         payable
+        notHaveStore(_sellerAddress)
         returns (bool)
     {
         externalEnter();
-        storesAccount[_selleraddress] = Store(_selleraddress, _name, _email, _arbiter, _storeFrontImage, 0/*msg.value*/, 0);
+        storesCount = storesCount.add(1);
+        storesById[storesCount] = Store(_sellerAddress, _name, _email, _arbiter, _storeFrontImage, 0/*msg.value*/, 0);
+        storesBySellers[_sellerAddress] = storesCount;
         externalLeave();
         return true;
     }
@@ -36,12 +40,15 @@ contract Ecommerce is ReentryProtector {
         emit LogDonnationReceived(msg.sender, msg.value);
     }
     
-    mapping (address => Store) public storesAccount;             // Stores by addresses
-    mapping (address => uint) public storesProductCount;         // product count by store
+    mapping (uint => Store) public storesById;                   // Stores by id
     mapping (address => mapping(uint => Product)) public stores; // products by stores
-    mapping (uint => address) public storesByProductId;               // seller product id 
+    mapping (uint => address) public storesByProductId;          // store by product Id
+    mapping (address => uint) public storesBySellers;            // store by seller address, used to prevent more than one store per user
+    mapping (address => uint) public productCountByStore;        // product count by store
     mapping (uint => address) public productsEscrow;             // product escrow control
-    
+
+    uint public storesCount;
+    uint public productCount;
 
     struct Store {
         address storeAddress;
@@ -69,7 +76,14 @@ contract Ecommerce is ReentryProtector {
         bool exists;
     }
     
-    modifier onlyStoreOwner() { require(storesAccount[msg.sender].storeAddress == msg.sender, "You are not the store owner!" );  _;}
+    modifier notHaveStore(address sellerAddress) { 
+        require(!(sellerAddress == storesById[storesBySellers[sellerAddress]].storeAddress), "User already has a store" ); 
+        _;
+    }
+    modifier onlyStoreOwner() { 
+        require(storesById[storesBySellers[msg.sender]].storeAddress == msg.sender, "You are not the store owner!" ); 
+        _;
+    }
     modifier requireProductName(bytes32 _name) { require(!(_name == 0x0), "Product name is mandatory"); _;}
     modifier requireProductCategory(bytes32 _productCategory) { require(!(_productCategory == 0x0), "Product category is mandatory"); _;}
     modifier requireDescLink(bytes32 _descLink) { require(!(_descLink == 0x0), "Product description is mandatory"); _;}
@@ -124,6 +138,7 @@ contract Ecommerce is ReentryProtector {
     event LogReleaseAmountToSeller(bytes32 message, uint productId, address caller);
     event LogRefundAmountToBuyer(bytes32 message, uint productId, address caller);
     event LogWithdraw(bytes32 message, uint productId, address caller);
+    event LogProductUpdated(bytes32 message, uint productId);
 
 
    /** @dev Add product to stores mapping - imageLink and descLink are initialized with blanks,
@@ -151,8 +166,11 @@ contract Ecommerce is ReentryProtector {
         validProductCondition(_productCondition)
     {
         externalEnter();
+        
+        productCount = productCount.add(1);
+
         Product memory product = Product(
-            storesProductCount[msg.sender], 
+            productCount,
             _name, 
             _category, 
             "", 
@@ -165,10 +183,12 @@ contract Ecommerce is ReentryProtector {
             true
         );
 
-        stores[msg.sender][storesProductCount[msg.sender]] = product;
-        storesByProductId[storesProductCount[msg.sender]] = msg.sender;
-        storesProductCount[msg.sender] = storesProductCount[msg.sender].add(1);        
-        emit LogForSale("Product for Sale:", storesProductCount[msg.sender]);
+        stores[msg.sender][productCount] = product; 
+        storesByProductId[productCount] = msg.sender;
+
+        // update product count by store
+        productCountByStore[msg.sender] = productCountByStore[msg.sender].add(1);        
+        emit LogForSale("Product for Sale:", productCountByStore[msg.sender]);
         externalLeave();
     }
 
@@ -187,7 +207,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[storesByProductId[_id]][_id].imageLink = _imageLink;
-        emit LogForSale("Product image updated:", storesProductCount[msg.sender]);
+        emit LogProductUpdated("Product image updated:", _id);
         externalLeave();
     }
 
@@ -206,7 +226,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[storesByProductId[_id]][_id].descLink = _descLink;
-        emit LogForSale("Product description updated:", storesProductCount[msg.sender]);
+        emit LogProductUpdated("Product description updated:", _id);
         externalLeave();
     }
 
@@ -222,7 +242,7 @@ contract Ecommerce is ReentryProtector {
     {
         externalEnter();
         stores[msg.sender][_id].productState = ProductState.Deleted;
-        storesProductCount[msg.sender] = storesProductCount[msg.sender].sub(1);
+        productCountByStore[msg.sender] = productCountByStore[msg.sender].sub(1);
         emit LogProductRemoved("Product removed:", _id);
         externalLeave();
     }
@@ -404,23 +424,18 @@ contract Ecommerce is ReentryProtector {
     function initEscrow(uint _id, uint _value, address _buyer)
         internal
     {
-        externalEnter();
         // create escrow contract
+        
         Escrow escrow = (new Escrow).value(_value)(
             _id, 
             _buyer,
             storesByProductId[_id],  //seller
-            storesAccount[storesByProductId[_id]].arbiter //load arbiter from the Store
+            storesById[storesBySellers[storesByProductId[_id]]].arbiter //load arbiter from the Store
         );
         productsEscrow[_id] = escrow;
         
-        emit LogEscrowCreated(_id, _buyer, storesByProductId[_id], storesAccount[storesByProductId[_id]].arbiter);
+        emit LogEscrowCreated(_id, _buyer, storesByProductId[_id], storesById[storesBySellers[storesByProductId[_id]]].arbiter);
 
-        externalLeave();
     }
-
-
-
-
     
 }
