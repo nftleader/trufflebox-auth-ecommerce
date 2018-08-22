@@ -4,61 +4,59 @@ import { routerActions } from 'react-router-redux'
 // Layout Component Wrappers
 
 export const UserIsAuthenticated = UserAuthWrapper({
-  authSelector: state => state.user.data,
+  authSelector: state => state.user.data.userType,
   redirectAction: routerActions.replace,
-  failureRedirectPath: '/', // '/login' by default.
-  wrapperDisplayName: 'UserIsAuthenticated'
+  failureRedirectPath: '/signup', // '/login' by default.
+  wrapperDisplayName: 'UserIsAuthenticated',
 })
 
 export const UserIsNotAuthenticated = UserAuthWrapper({
-  authSelector: state => state.user,
+  authSelector: state => state.user.data.userType,
   redirectAction: routerActions.replace,
-  failureRedirectPath: (state, ownProps) => ownProps.location.query.redirect || '/dashboard',
+  failureRedirectPath: (state, ownProps) => ownProps.location.query.redirect || '/',
   wrapperDisplayName: 'UserIsNotAuthenticated',
-  predicate: user => user.data === null,
-  allowRedirectBack: false
-})
+})  
 
 // UI Component Wrappers
 
 export const VisibleOnlyAuth = UserAuthWrapper({
   authSelector: state => state.user,
   wrapperDisplayName: 'VisibleOnlyAuth',
-  predicate: user => user.data,
+  predicate: user => user.data.userType,
   FailureComponent: null
 })
 
 export const HiddenOnlyAuth = UserAuthWrapper({
-  authSelector: state => state.user,
+  authSelector: state => state.user.data,
   wrapperDisplayName: 'HiddenOnlyAuth',
-  predicate: user => user.data === null,
+  predicate: data => data.userType === '',
   FailureComponent: null
 })
 
 export const VisibleOnlySeller = UserAuthWrapper({
-  authSelector: state => state.user,
+  authSelector: state => state.user.data,
   wrapperDisplayName: 'VisibleOnlySeller',
-  predicate: user => user.usertype === 'seller',
+  predicate: data => data.userType === 'Seller',
   FailureComponent: null
 })
 
 export const VisibleOnlyBuyer = UserAuthWrapper({
-  authSelector: state => state.user,
+  authSelector: state => state.user.data,
   wrapperDisplayName: 'VisibleOnlyBuyer',
-  predicate: user => user.usertype === 'buyer',
+  predicate: data => data.userType === 'Buyer',
   FailureComponent: null
 })
 
 export const VisibleOnlyOwner = UserAuthWrapper({
-  authSelector: state => state.user,
+  authSelector: state => state.user.data,
   wrapperDisplayName: 'VisibleOnlyOwner',
-  predicate: user => user.usertype === 'owner',
+  predicate: data => data.userType === 'Owner',
   FailureComponent: null
 })
 
 export const VisibleOnlyAdmin = UserAuthWrapper({
-  authSelector: state => state.user,
+  authSelector: state => state.user.data,
   wrapperDisplayName: 'VisibleOnlyAdmin',
-  predicate: user => user.usertype === 'admin',
+  predicate: data => data.userType === 'Arbiter',
   FailureComponent: null
 })

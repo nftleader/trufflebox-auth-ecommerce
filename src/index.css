@@ -17,3 +17,15 @@ body {
 .pagination{
   margin-left:50% !important;
 }
+.active {
+  color: green !important;
+}
+.actives {
+  color: rgb(128, 109, 0) !important;
+}
+.storeform {
+  margin-top:5% !important;
+}
+.storeseg {
+  height:100% !important;
+}

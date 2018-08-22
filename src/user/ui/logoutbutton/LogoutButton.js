@@ -1,11 +1,17 @@
-import React from 'react'
+import React, { Component } from 'react'
 
-const LogoutButton = ({ onLogoutUserClick }) => {
-  return(
-    <li className="pure-menu-item">
-      <a href="#" className="pure-menu-link" onClick={(event) => onLogoutUserClick(event)}>Logout</a>
-    </li>
-  )
+
+class LogoutButton extends Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    return(
+      <li className="pure-menu-item">
+        <a href="#" className="pure-menu-link" onClick={(event) => this.props.onLogoutUserClick(event)}>Logout({this.props.role})</a>
+      </li>
+    )
+  }
 }
 
 export default LogoutButton

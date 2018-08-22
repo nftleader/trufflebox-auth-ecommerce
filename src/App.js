@@ -32,34 +32,22 @@ class App extends Component {
     const OnlySellerLinks = VisibleOnlySeller(()=>
       <span>
         <li className="pure-menu-item">
-          <Link to="/dashboard" className="pure-menu-link">SellerHome</Link>
+          <Link activeClassName="actives" to="/store" className="pure-menu-link">Store</Link>
         </li>
         <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Sellermenu1</Link>
+          <Link activeClassName="actives" to="/product" className="pure-menu-link">Product</Link>
         </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Sellermenu2</Link>
-        </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Sellermenu3</Link>
-        </li>
-        <LogoutButtonContainer />
+        <LogoutButtonContainer role="Seller"/>
       </span>
     )
 
     const OnlyBuyerLinks = VisibleOnlyBuyer(()=>
       <span>
         <li className="pure-menu-item">
-          <Link to="/dashboard" className="pure-menu-link">BuyerHome</Link>
+          <Link activeClassName="actives" to="/" className="pure-menu-link">Store</Link>
         </li>
         <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Buyermenu1</Link>
-        </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Buyerrmenu2</Link>
-        </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Buyermenu3</Link>
+          <Link activeClassName="actives" to="/" className="pure-menu-link">Product</Link>
         </li>
         <LogoutButtonContainer />
       </span>
@@ -68,16 +56,7 @@ class App extends Component {
     const OnlyOwnerLinks = VisibleOnlyOwner(()=>
       <span>
         <li className="pure-menu-item">
-          <Link to="/dashboard" className="pure-menu-link">OwnerHome</Link>
-        </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Ownermenu1</Link>
-        </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Ownermenu2</Link>
-        </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Ownermenu3</Link>
+          <Link to="/" className="pure-menu-link">Home</Link>
         </li>
         <LogoutButtonContainer />
       </span>
@@ -86,18 +65,15 @@ class App extends Component {
     const OnlyAdminLinks = VisibleOnlyAdmin(()=>
       <span>
         <li className="pure-menu-item">
-          <Link to="/dashboard" className="pure-menu-link">AdminHome</Link>
+          <Link activeClassName="actives" to="/" className="pure-menu-link">Home</Link>
         </li>
         <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Adminmenu1</Link>
+          <Link activeClassName="active" to="/dashboard" className="pure-menu-link">Dashboard</Link>
         </li>
         <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Adminmenu2</Link>
+          <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
         </li>
-        <li className="pure-menu-item">
-          <Link to="/profile" className="pure-menu-link">Adminmenu3</Link>
-        </li>
-        <LogoutButtonContainer />
+        <LogoutButtonContainer role="Owner" />
       </span>
     )
 
@@ -115,7 +91,6 @@ class App extends Component {
         <nav className="navbar pure-menu pure-menu-horizontal">
           <ul className="pure-menu-list navbar-right">
             <OnlyGuestLinks />
-            <OnlyAuthLinks />
             <OnlySellerLinks/>
             <OnlyBuyerLinks/>
             <OnlyOwnerLinks/>

@@ -2,8 +2,9 @@
 //seller, buyer, owner, admin
 
 const initialState = {
-  data: null,
-  usertype:'seller'
+  data:{
+    userType:'',
+  },
 }
 
 const userReducer = (state = initialState, action) => {
@@ -15,7 +16,7 @@ const userReducer = (state = initialState, action) => {
   if (action.type === 'USER_LOGGED_OUT')
   {
     return Object.assign({}, state, {
-      data: null
+      data:{ userType: ''}
     })
   }
 

@@ -3,9 +3,8 @@ import { Table, Button, Grid } from 'semantic-ui-react'
 import UserDetailedModal from 'components/common/UserDetailedModal'
 
 class Dashboard extends Component {
-  constructor(props, { authData }) {
+  constructor(props) {
     super(props)
-    authData = this.props
 
     this.state = {};
     this.state.datas = [{

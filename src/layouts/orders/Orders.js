@@ -3,9 +3,8 @@ import { Table, Button, Grid } from 'semantic-ui-react'
 import OrderDetailedModal from './OrderDetailedModal'
 
 class Orders extends Component {
-  constructor(props, { authData }) {
+  constructor(props) {
     super(props)
-    authData = this.props
 
     this.state = {};
     this.state.datas = [{

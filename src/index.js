@@ -11,7 +11,7 @@ import App from './App'
 import Home from './layouts/home/Home'
 import Dashboard from './layouts/dashboard/Dashboard'
 import Orders from './layouts/orders/Orders'
-
+import Store from 'components/seller/Store'
 import SignUp from './user/layouts/signup/SignUp'
 import Profile from './user/layouts/profile/Profile'
 import 'semantic-ui-css/semantic.min.css';
@@ -41,8 +41,8 @@ ReactDOM.render((
           <IndexRoute component={Home} />
           <Route path="dashboard" component={UserIsAuthenticated(Dashboard)} />
           <Route path="orders" component={UserIsAuthenticated(Orders)} />
-
-          <Route path="signup" component={UserIsNotAuthenticated(SignUp)} />
+          <Route path="store" component={UserIsAuthenticated(Store)} />
+          <Route path="signup" component={SignUp} />
           <Route path="profile" component={UserIsAuthenticated(Profile)} />          
         </Route>
       </Router>

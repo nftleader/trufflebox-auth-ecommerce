@@ -17,16 +17,16 @@ module.exports =  function(deployer) {
   deployer.link(ReentryProtector, Ecommerce);
   deployer.link(Escrow, Ecommerce);
 
-  deployer.link(Ownable, Authentication);
-  deployer.link(Killable, Authentication);
-  deployer.link(SafeMath, Authentication);
-  deployer.link(ReentryProtector, Authentication);
-  deployer.link(Ecommerce, Authentication);
-
-
   deployer.deploy(Ecommerce).then(function(depEcommerce) {
     console.log("Ecommerce Address : ", depEcommerce.address);
     console.log("deployer : ", deployer);
+    
+    deployer.link(Ownable, Authentication);
+    deployer.link(Killable, Authentication);
+    deployer.link(SafeMath, Authentication);
+    deployer.link(ReentryProtector, Authentication);
+    deployer.link(Ecommerce, Authentication);
+  
     return deployer.deploy(Authentication, depEcommerce.address /*, {gas:100000000}*/);
   }).then((ans) => {
     //if we don't process this then, auth.sol doesn't migrate

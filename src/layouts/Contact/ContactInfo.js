@@ -2,9 +2,8 @@ import React, { Component } from 'react'
 import { Table, Button } from 'semantic-ui-react'
 
 class ContactInfo extends Component {
-  constructor(props, { authData }) {
+  constructor(props) {
     super(props)
-    authData = this.props
 
     this.state = {};
     this.state.contactInfo = {
