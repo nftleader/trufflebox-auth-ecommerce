@@ -14,7 +14,7 @@ const store = createStore(
   reducer,
   composeEnhancers(
     applyMiddleware(
-      logger,
+//      logger,
       thunkMiddleware,
       routingMiddleware
     )

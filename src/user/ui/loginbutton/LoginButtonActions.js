@@ -13,20 +13,40 @@ function userLoggedIn(user) {
   }
 }
 
-let getUserList = async function(authenticationInstance){
+let getDataForOwner = async function(authenticationInstance, coinbase){
   let OwnerObj = {
     type: OWNER_LOGGED_IN,
     payload:{
+      contractData:{
+        address: "0x0",
+        abi: ""
+      },
+      balance: 0,
       userCount: 0,
+      arbiterCount: 0,
+      sellerCount: 0,
       userData:[]
     }
   };
 
-  const usersCountBigNumber = await authenticationInstance.usersCount();
-  let usersCount = usersCountBigNumber.toNumber();
-  console.log("***********  users count: ", usersCount, usersCountBigNumber);
   let web3 = store.getState().web3.web3Instance;
-  OwnerObj.payload.userCount = usersCount;
+
+  //contract info
+  OwnerObj.payload.contractData.address = authenticationInstance.address;
+  OwnerObj.payload.contractData.abi = authenticationInstance.abi;
+  //admin balance
+  await web3.eth.getBalance(coinbase, (err, res) => {
+    if (err) { Promise.reject(err) }
+    OwnerObj.payload.balance = web3.fromWei(res.toString(10), "ether");
+    Promise.resolve(res);
+  });
+
+  const usersCountBigNumber = await authenticationInstance.usersCount.call();
+  let usersCount = usersCountBigNumber.toNumber();
+  let arbiterCount = 0;
+  let sellerCount = 0;
+  console.log("***********  users count: ", usersCount, usersCountBigNumber);
+
   for(let i = 1; i <= usersCount; i++){
     try{
       const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authenticationInstance.getUser(i);
@@ -42,6 +62,8 @@ let getUserList = async function(authenticationInstance){
         userType: userTypes[userType.toNumber()],
         userState: userStatus[userState.toNumber()]
       };
+      if(obj.userType === "Seller") sellerCount++;
+      if(obj.userType === "Arbiter") arbiterCount++;
       console.log("***********  users obj: ", obj);
       OwnerObj.payload.userData.push(obj);
     }catch(err){
@@ -50,7 +72,12 @@ let getUserList = async function(authenticationInstance){
       continue;
     }
   }
+  OwnerObj.payload.userCount = usersCount;
+  OwnerObj.payload.sellerCount = sellerCount;
+  OwnerObj.payload.arbiterCount = arbiterCount;
+
   console.log("***********  return obj: ", OwnerObj);
+
   return OwnerObj;
 }
 
@@ -103,7 +130,7 @@ export function loginUser() {
               //dispatch(userLoggedIn(obj));
             }else if( obj.userType === "Owner"){
               //dispatch(userLoggedIn(obj));
-              return getUserList(authenticationInstance);
+              return getDataForOwner(authenticationInstance, coinbase);
             }
 
           }).then(function(result){ //finshed getting product
