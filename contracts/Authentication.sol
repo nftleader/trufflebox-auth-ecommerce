@@ -6,14 +6,13 @@ import "./ReentryProtector.sol";
 import "./zeppelin/SafeMath.sol";
 import "./Ecommerce.sol";
 
-
 /** @title Authentication contract */
 contract Authentication is Ownable, Killable, ReentryProtector {
     using SafeMath for uint256;
 
     Ecommerce ecommerce;
 
-    constructor(address ecommerceAddress) public payable{
+    constructor(address ecommerceAddress) public payable {
         ecommerce = Ecommerce(ecommerceAddress);
     }
 
@@ -39,21 +38,24 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     }
 
     mapping (address => User) public users;
-    mapping (address => address) public storesBySellers;
+    mapping (uint => address) public usersById;
+    // mapping (address => address) public storesBySellers;
+    mapping (uint => address) public sellersById;
     mapping (address => uint) public pendingWithdraws;
 
     uint public usersCount;  
-    uint public storesCount;   
+    uint public sellersCount;   
 
     modifier onlyExistingUser(address user) { require(users[user].exists, "User is not registered"); _; }
-    modifier onlyValidName(bytes32 name) { require(!(name == 0x0), "Invalid name"); _; }
+    modifier onlyExistingUserID(uint userid) { require(usersById[userid] != 0, "User ID is not registered"); _; }
+    modifier onlyValidName(bytes32 name) { require(name.length > 0, "Invalid name"); _; }
     modifier onlyValidEmail(bytes32 email) { require(!(email == 0x0), "Invalid email"); _; }
     modifier onlyValidPhone(bytes32 phoneNumber) { require(!(phoneNumber == 0x0), "Invalid phone number"); _; }
     modifier onlyValidProfilePicture(bytes32 profilePicture) { require(!(profilePicture == 0x0), "Invalid profile picture"); _; }
     modifier onlyPendingState(address user) { require( users[user].userState == UserState.Pending, "User not on Pending state."); _; }
     modifier onlyApprovedState() { require( users[msg.sender].userState == UserState.Approved, "User not on Approved state."); _; }
     modifier onlySeller { require(users[msg.sender].userType == UserType.Seller, "User is not an seller."); _; }
-    modifier doesNotHaveStore { require(storesBySellers[msg.sender] !=  0x0 , "User already has a store"); _; }
+    // modifier doesNotHaveStore { require(storesBySellers[msg.sender] !=  0x0 , "User already has a store"); _; }
     modifier requireArbiter(address _arbiter) { require( users[_arbiter].userType == UserType.Arbiter , "A store require an arbiter."); _; }
 
     event LogDonnationReceived(address sender, uint value);
@@ -121,50 +123,54 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         * @return name, email, phoneNumber, profilePicture, userType 
         */
     function signup(
-        bytes32 _name,
-        bytes32 _email,
-        bytes32 _phoneNumber,
-        bytes32 _profilePicture,
+        string _name,
+        string _email,
+        string _phoneNumber,
+        string _profilePicture,
         UserType _userType
     )
         external
         payable
-        onlyValidName(_name)
-        onlyValidEmail(_email)
-        onlyValidPhone(_phoneNumber)
-        onlyValidProfilePicture(_profilePicture)
-        returns (bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
+        // onlyValidName(_name)
+        // onlyValidEmail(_email)
+        // onlyValidPhone(_phoneNumber)
+        // onlyValidProfilePicture(_profilePicture)
+        returns (uint) 
     {
+
+        if (users[msg.sender].exists)  return 0;   //exisitng user
+
         externalEnter();
-        emit LogUserSignUp(msg.sender);
-        // creates if user already exists
-        if (!users[msg.sender].exists)
-        {
-            users[msg.sender].name = _name;
-            users[msg.sender].email = _email;
-            users[msg.sender].phoneNumber = _phoneNumber;
-            users[msg.sender].profilePicture = _profilePicture;
-            users[msg.sender].userType = _userType;
+        User memory newbie;
+        newbie.name = stringToBytes32(_name);
+        newbie.email = stringToBytes32(_email);
+        newbie.phoneNumber = stringToBytes32(_phoneNumber);
+        newbie.profilePicture = stringToBytes32(_profilePicture);
+        
+        require(newbie.name.length > 0, "Invalid name");
+        require(newbie.email.length > 0, "Invalid email");
+        require(newbie.phoneNumber.length > 0, "Invalid phoneNumber");
+        require(newbie.profilePicture.length > 0, "Invalid profilePicture");
+        
+        newbie.userType = _userType;
+        newbie.exists = true;
 
-            if (_userType == UserType.Buyer) {
-                users[msg.sender].userState = UserState.Approved;
-            } else {
-                users[msg.sender].userState = UserState.Pending;
-            }
-            users[msg.sender].exists = true;
-
-            usersCount = usersCount.add(1);
+        if (_userType == UserType.Buyer) {
+            newbie.userState = UserState.Approved;
+        } else {
+            newbie.userState = UserState.Pending;
         }
+
+        emit LogUserSignUp(msg.sender);
+        
+        users[msg.sender] = newbie;
+        
+        usersCount = usersCount.add(1);
+        usersById[usersCount] = msg.sender;
+    
         externalLeave();
 
-        return (
-            users[msg.sender].name,
-            users[msg.sender].email,
-            users[msg.sender].phoneNumber,
-            users[msg.sender].profilePicture,
-            users[msg.sender].userType,
-            users[msg.sender].userState
-        );
+        return usersCount;
     }
 
     /** @dev update user data
@@ -287,19 +293,40 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         requireArbiter(_arbiter)
         returns (bool) 
     {
-        externalEnter();
-        
-        //address newStoreAddress = (new Ecommerce).value(msg.value)(_name, _email, _arbiter, _storeImage);
+        externalEnter();   
         bool addStoreResult = ecommerce.addStore(_name, _email, _arbiter, _storeImage, msg.sender);
-        if(addStoreResult == false)
-            return false;
-        storesCount = storesCount.add(1);
-        //storesBySellers[msg.sender] = newStoreAddress;
-        storesBySellers[msg.sender] = msg.sender;   //value doesn't matter
-        emit LogCreateStore("New store created", msg.sender, msg.sender);
+        if(addStoreResult)
+        {
+            sellersCount = sellersCount.add(1);
+            sellersById[sellersCount] = msg.sender;
+            emit LogCreateStore("New store created", msg.sender, msg.sender);
+        }
         externalLeave();
 
-        return true;
+        return addStoreResult;
     }
 
+
+    /** @dev get a user's data
+    * @return User struct
+    */
+    function getUser(uint _id) 
+        external
+        view
+        onlyExistingUserID(_id)
+        returns ( address, bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
+    {
+        User memory user = users[usersById[_id]]; // load product from memory
+        return (
+            usersById[_id],
+            user.name,
+            user.email,
+            user.phoneNumber,
+            user.profilePicture,
+            user.userType,
+            user.userState
+        );
+    }
 }
+
+

@@ -1,9 +1,9 @@
 const Authentication = artifacts.require('./Authentication.sol');
-import expectThrow from './helpers/expectThrow';
-import { catchRevert } from './helpers/exceptions';
+const Ecommerce = artifacts.require('./Ecommerce.sol');
 
 contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 	let authentication;
+	let ecommerce;
 
 	console.log();
 	console.log('Users List:');
@@ -14,24 +14,31 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 	console.log('Contract arbiter ', arbiter);
 
 	beforeEach('setup contract for each test', async () => {
-		authentication = await Authentication.new(owner);
+		ecommerce = await Ecommerce.new();
+
+		authentication = await Authentication.new(ecommerce.address);
+		console.log(' === before each ===');
+		console.log('ecommerce.address     : ', ecommerce.address);
+		console.log('authentication.address: ', authentication.address);
 	});
 
 	it('contract has an owner', async () => {
 		assert.equal(await authentication.owner(), owner);
 	});
 
-	// it('contract is able to accept funds', async () => {
-	// 	await authentication.sendTransaction({ value: web3.toWei(1), from: owner });
-	// 	const authAddress = await authentication.address;
-	// 	assert.equal(web3.eth.getBalance(authAddress).toNumber(), web3.toWei(1));
-	// });
+	it('contract is able to accept funds', async () => {
+		await authentication.sendTransaction({ value: web3.toWei(1), from: owner });
+		const authAddress = await authentication.address;
+		assert.equal(web3.eth.getBalance(authAddress).toNumber(), web3.toWei(1));
+	});
 
 	it('login as Owner', async () => {
-		const [ name, email, phoneNumber, profilePicture, userType, userState ]  = await authentication.login({ from: owner });
+		const [ name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.login({
+			from: owner
+		});
 		const expectedUserType = 3; // Owner
 
-		assert.equal(userType.c[0] ,expectedUserType, 'Owner coult not log in.');
+		assert.equal(userType.c[0], expectedUserType, 'Owner coult not log in.');
 	});
 
 	it('should sign up and log in as a Buyer', async () => {
@@ -84,6 +91,13 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 			from: seller
 		});
 
+		console.log("^^^^^^^^^^^ name : ", name);
+		console.log("^^^^^^^^^^^ email : ", email);
+		console.log("^^^^^^^^^^^ phoneNumber : ", phoneNumber);
+		console.log("^^^^^^^^^^^ profilePicture : ", profilePicture);
+		console.log("^^^^^^^^^^^ userType : ", userType);
+		console.log("^^^^^^^^^^^ userState : ", userState);
+
 		assert.equal(expectedName, web3.toUtf8(name), 'User name does not match.');
 		assert.equal(expectedEmail, web3.toUtf8(email), 'User email does not match.');
 		// assert.equal(expetectPhoneNumber, web3.toBN(phoneNumber) , 'User phone number does not match.');
@@ -133,12 +147,17 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 			expectedUserType,
 			{ from: seller }
 		);
-
 		await authentication.updateUserState(seller, expectedUserState, { from: owner });
 
-		const [ name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.users.call(
-			seller
-		);
+		const userID = await authentication.usersCount.call();
+		console.log("******* userID : ", userID);
+		const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.getUser(userID.toNumber());
+		console.log("******* address : ", address);
+		console.log("******* name : ", name);
+		console.log("******* email : ", email);
+		console.log("******* phoneNumber : ", phoneNumber);
+		console.log("******* profilePicture : ", profilePicture);
+		console.log("******* userState : ", userState);
 		assert.equal(expectedUserState, userState.c[0], 'Seller not approved');
 
 		// create an arbiter for the store
@@ -157,22 +176,58 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 			expectedUserType,
 			{ from: arbiter }
 		);
+		await authentication.updateUserState(arbiter, expectedUserState, { from: owner });
 
 		// create store
-		const storeName = 'ebay';
-		const storeEmail = 'ebay@gmail.com';
+		const storeName = '0x1';
+		const storeEmail = '0x1';
 		const storeImage = 'image';
-		const storeArbiter = arbiter;
 
-		const newStoreAddress = await authentication.createStore(storeName, storeEmail, storeImage, storeArbiter, {
-			from: seller
-		});
+		await authentication.createStore(storeName, storeEmail, storeImage, arbiter, { from: seller });
 
-		const storeAddress = await authentication.storesBySellers.call(seller);
+		const sellerAddress = await authentication.sellersById.call(1);
+		assert.equal(sellerAddress, seller, 'Store not created');
+	});
 
-		// console.log('storeAddress  ======= ' , storeAddress);
-		// console.log('newStoreAddress  ======= ' , newStoreAddress);
+	it('list users', async () => {
+		//let expectedName = '0x12e18';
+		let expectedName = 'asdfasdfasdf';
+		let expectedEmail = 'seller@test.com';
+		let expectedPhoneNumber = '987654321';
+		let expectedProfilePicture = 'a987654321';
+		let expectedUserType = 1; // Seller
+		let expectedUserState = 1; // Approved
 
-		// assert.equal(newStoreAddress, storeAddress, 'Store address does not match created address');
+		await authentication.signup(
+			expectedName,
+			expectedEmail,
+			expectedPhoneNumber,
+			expectedProfilePicture,
+			expectedUserType,
+			{ from: seller }
+		);
+
+		const usersCount = await authentication.usersCount.call();
+		console.log('usersCount: ', usersCount.toNumber());
+
+		let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
+		let userStatus = ["Pending", "Approved"];
+		
+		let obj = {};
+		for (let i = 1; i <= usersCount; i++) {
+			const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authentication.getUser(i);
+			obj = {
+				id : i,
+				address: address,
+				name: web3.toUtf8(name),
+				email: web3.toUtf8(email),
+				phoneNumber:web3.toUtf8(phoneNumber),
+				profilePicture: web3.toUtf8(profilePicture),
+				userType: userTypes[userType.toNumber()],
+				userState: userStatus[userState.toNumber()]
+			};
+			console.log(obj);
+		}
+		assert.equal(obj.name, expectedName, 'Failed on list users');
 	});
 });

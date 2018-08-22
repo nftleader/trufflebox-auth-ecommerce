@@ -13,11 +13,72 @@ function userLoggedIn(user) {
   }
 }
 
-function ownerLoggedIn(data) {
-  return {
+let getDataForOwner = async function(authenticationInstance, coinbase){
+  let OwnerObj = {
     type: OWNER_LOGGED_IN,
-    payload: data
+    payload:{
+      contractData:{
+        address: "0x0",
+        abi: ""
+      },
+      balance: 0,
+      userCount: 0,
+      arbiterCount: 0,
+      sellerCount: 0,
+      userData:[]
+    }
+  };
+
+  let web3 = store.getState().web3.web3Instance;
+
+  //contract info
+  OwnerObj.payload.contractData.address = authenticationInstance.address;
+  OwnerObj.payload.contractData.abi = authenticationInstance.abi;
+  //admin balance
+  await web3.eth.getBalance(coinbase, (err, res) => {
+    if (err) { Promise.reject(err) }
+    OwnerObj.payload.balance = web3.fromWei(res.toString(10), "ether");
+    Promise.resolve(res);
+  });
+
+  const usersCountBigNumber = await authenticationInstance.usersCount.call();
+  let usersCount = usersCountBigNumber.toNumber();
+  let arbiterCount = 0;
+  let sellerCount = 0;
+  console.log("***********  users count: ", usersCount, usersCountBigNumber);
+
+  for(let i = 1; i <= usersCount; i++){
+    try{
+      const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authenticationInstance.getUser(i);
+      let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
+      let userStatus = ["Pending", "Approved"];
+      let obj = {
+        id : i,
+        address: address,
+        name: web3.toUtf8(name),
+        email: web3.toUtf8(email),
+        phoneNumber:web3.toUtf8(phoneNumber),
+        profilePicture: web3.toUtf8(profilePicture),
+        userType: userTypes[userType.toNumber()],
+        userState: userStatus[userState.toNumber()]
+      };
+      if(obj.userType === "Seller") sellerCount++;
+      if(obj.userType === "Arbiter") arbiterCount++;
+      console.log("***********  users obj: ", obj);
+      OwnerObj.payload.userData.push(obj);
+    }catch(err){
+      console.log("missing user id ", i);
+      console.log("error ", err);
+      continue;
+    }
   }
+  OwnerObj.payload.userCount = usersCount;
+  OwnerObj.payload.sellerCount = sellerCount;
+  OwnerObj.payload.arbiterCount = arbiterCount;
+
+  console.log("***********  return obj: ", OwnerObj);
+
+  return OwnerObj;
 }
 
 export function loginUser() {
@@ -69,11 +130,11 @@ export function loginUser() {
               //dispatch(userLoggedIn(obj));
             }else if( obj.userType === "Owner"){
               //dispatch(userLoggedIn(obj));
-              let OwnerObj = {
-                data:'test data'
-              };
-              dispatch(ownerLoggedIn(OwnerObj));
+              return getDataForOwner(authenticationInstance, coinbase);
             }
+
+          }).then(function(result){ //finshed getting product
+            if(result)  dispatch(result);
 
             // Used a manual redirect here as opposed to a wrapper.
             // This way, once logged in a user can still access the home page.
@@ -84,19 +145,13 @@ export function loginUser() {
               return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
             }
 
-            if( obj.userType === "Buyer"){
-              return browserHistory.push('/')
-            }else if( obj.userType === "Seller"){
-              return browserHistory.push('/store')
-            }else if( obj.userType === "Arbiter"){
-              return browserHistory.push('/')
-            }else if( obj.userType === "Owner"){
-              return browserHistory.push('/')
-            }
+            return browserHistory.push('/dashboard')
+
           })
-          .catch(function(result) {
+          .catch(function(error) {
             // If error, go to signup page.
             console.error('Wallet ' + coinbase + ' does not have an account!')
+            console.error('Error obj ', error)
 
             return browserHistory.push('/signup')
           })
