@@ -23,7 +23,12 @@ module.exports =  function(deployer) {
     deployer.link(SafeMath, Authentication);
     deployer.link(ReentryProtector, Authentication);
     deployer.link(Ecommerce, Authentication);
+    return deployer.deploy(Authentication, depEcommerce.address );
+  }).then((ans) => {
+    return ans;
+  });
 };
+
 /*
 var Authentication_flat = artifacts.require('../contracts_flat/Authentication_flat.sol');
 
