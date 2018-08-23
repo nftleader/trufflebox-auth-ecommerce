@@ -1,12 +1,16 @@
 import React, { Component } from 'react'
 import { Table, Button, Grid } from 'semantic-ui-react'
 import UserDetailedModal from 'components/common/UserDetailedModal'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import * as OwnerAction from 'components/owner/OwnerAction'
 
 class Dashboard extends Component {
   constructor(props) {
     super(props)
 
     this.state = {};
+    this.state.col = [1,4,3,1,1]
     this.state.datas = [{
       name: 'aaa',
       email: 'email1.e.com',
@@ -37,6 +41,20 @@ class Dashboard extends Component {
     }
   }
 
+  componentDidMount() {
+    this.setState({
+      contactInfo: {
+        admins:   this.props.dashboard.data.arbiterCount,
+        address:  this.props.dashboard.data.contractData.address,
+        balance:  this.props.dashboard.data.balance,
+        stores: 0,
+        sellers: this.props.dashboard.data.sellerCount,
+      }
+    });
+    this.setState({
+      datas:this.props.dashboard.data.userData
+    })
+  }
   //{Pending, Approved}
   showState(state) {
     if (state == 'Pending')
@@ -45,31 +63,31 @@ class Dashboard extends Component {
       return (<Table.Cell positive>{state}</Table.Cell>);
   }
 
-  showTypeBtn(curType, tgtType, title, email) {
+  showTypeBtn(curType, tgtType, title, id) {
     if (curType == tgtType)
-      return (<Button>{tgtType}</Button>);
+      return (<Button positive>{tgtType}</Button>);
     else
-      return (<Button positive onClick={() => this.onClickUserType(tgtType, email)}>{tgtType}</Button>);
+      return (<Button onClick={() => this.onClickUserType(tgtType, id)}>{tgtType}</Button>);
   }
-  showTypeBtns(type, email) {
+  showTypeBtns(type, id) {
     return (
       <Table.Cell>
         <Button.Group>
-          {this.showTypeBtn(type, 'Buyer', 'Buyer', email)}
+          {this.showTypeBtn(type, 'Buyer', 'Buyer', id)}
           <Button.Or />
-          {this.showTypeBtn(type, 'Seller', 'Seller', email)}
+          {this.showTypeBtn(type, 'Seller', 'Seller', id)}
           <Button.Or />
-          {this.showTypeBtn(type, 'Owner', 'Owner', email)}
+          {this.showTypeBtn(type, 'Owner', 'Owner', id)}
         </Button.Group>
       </Table.Cell>);
   }
 
-  showStateBtns(state, email) {
+  showStateBtns(state, id) {
     if (state == 'Approved') {
       return (
         <Table.Cell>
           <Button.Group>
-            <Button onClick={() => this.onClickUserState('Pending', email)}>Pending</Button>
+            <Button onClick={() => this.onClickUserState('Pending', id)}>Pending</Button>
             <Button.Or />
             <Button positive>Approve</Button>
           </Button.Group>
@@ -80,30 +98,37 @@ class Dashboard extends Component {
           <Button.Group>
             <Button negative>Pending</Button>
             <Button.Or />
-            <Button onClick={() => this.onClickUserState('Approved', email)}>Approve</Button>
+            <Button onClick={() => this.onClickUserState('Approved', id)}>Approve</Button>
           </Button.Group>
         </Table.Cell>);
     }
   }
 
-  onClickUserType(type, email) {
-    alert(type + "   " + email);
+  onClickUserType(type, id) {
+    this.props.action.changeUserType(type, id);
   }
 
-  onClickUserState(state, email) {
-    alert(state + "   " + email);
+  onClickUserState(state, id) {
+    this.props.action.changeUserState(state, id);
   }
 
+  onClickWithdrawButton(){
+    alert('please withdraw');
+  }
   render() {
+    console.log('track_3');
+    console.log(this.props);
     return(
       <main className="container">
         <div className="row">
           <div className="col-md-12">
             <h3>Contact Info</h3>
             <Grid>
-              {Object.keys(this.state.contactInfo).map((key) => 
-                <Grid.Column width={2} key={key}>
-                  <p as='h5' >{key}: {this.state.contactInfo[key]}</p>
+              {Object.keys(this.state.contactInfo).map((key, index) => 
+                <Grid.Column width={this.state.col[index]} key={key}>
+                  <p as='h5' >{key}: {this.state.contactInfo[key]+' '}
+                    {key === 'balance' ?<Button size='tiny' onClick={() => this.onClickWithdrawButton()}>withdraw</Button>:''}
+                  </p>
                 </Grid.Column>)}
             </Grid>
           </div>
@@ -112,21 +137,21 @@ class Dashboard extends Component {
         <div className="row">
           <div className="col-md-12">
             <h3>User Information</h3>
-            <Table celled structured>
+            <Table celled structured textAlign = 'center'>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell rowSpan='2'>No</Table.HeaderCell>
                   <Table.HeaderCell rowSpan='2'>Name</Table.HeaderCell>
-                  <Table.HeaderCell rowSpan='2'>email</Table.HeaderCell>
-                  <Table.HeaderCell rowSpan='2'>address</Table.HeaderCell>
+                  <Table.HeaderCell rowSpan='2'>Email</Table.HeaderCell>
+                  <Table.HeaderCell rowSpan='2'>Address</Table.HeaderCell>
                   <Table.HeaderCell rowSpan='2'>User type</Table.HeaderCell>
                   <Table.HeaderCell rowSpan='2'>User state</Table.HeaderCell>
-                  <Table.HeaderCell rowSpan='2'>Details</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='2'>Action</Table.HeaderCell>
+                  <Table.HeaderCell colSpan='3'>Action</Table.HeaderCell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.HeaderCell>Change user type</Table.HeaderCell>
+                  <Table.HeaderCell>Change user Type</Table.HeaderCell>
                   <Table.HeaderCell>Change user state</Table.HeaderCell>
+                  <Table.HeaderCell>Details</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
 
@@ -139,13 +164,11 @@ class Dashboard extends Component {
                           <Table.Cell>{item.address}</Table.Cell>
                           <Table.Cell>{item.userType}</Table.Cell>
                           {this.showState(item.userState)}
-
-                          {this.showTypeBtns(item.userType, item.email)}
-                          {this.showStateBtns(item.userState, item.email)}
+                          {this.showStateBtns(item.userState, item.id)}
+                          {this.showTypeBtns(item.userType, item.id)}
                           <Table.Cell><UserDetailedModal info={item}/></Table.Cell>
                         </Table.Row> )})
               }
-                
               </Table.Body>
             </Table>
           </div>
@@ -155,4 +178,12 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard
+const mapStateToProps = state => ({
+  dashboard: state.owner
+})
+
+const mapDispatchToProps = dispatch => ({
+  action: bindActionCreators(OwnerAction, dispatch),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard)

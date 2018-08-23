@@ -10,6 +10,8 @@ const initialState = {
 const userReducer = (state = initialState, action) => {
   if (action.type === 'USER_LOGGED_IN' || action.type === 'USER_UPDATED')
   {
+    console.log('track_2');
+    console.log(action);
     return {...state, data:action.payload}
   }
 

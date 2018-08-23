@@ -56,9 +56,15 @@ class App extends Component {
     const OnlyOwnerLinks = VisibleOnlyOwner(()=>
       <span>
         <li className="pure-menu-item">
-          <Link to="/" className="pure-menu-link">Home</Link>
+          <Link activeClassName="actives" to="/" className="pure-menu-link">Home</Link>
         </li>
-        <LogoutButtonContainer />
+        <li className="pure-menu-item">
+          <Link activeClassName="active" to="/dashboard" className="pure-menu-link">Dashboard</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
+        </li>
+        <LogoutButtonContainer role="Owner"/>
       </span>
     )
 

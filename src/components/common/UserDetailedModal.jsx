@@ -3,9 +3,20 @@ import { Button, Header, Image, Modal, Grid } from 'semantic-ui-react'
 import ItemImage from 'images/image.png'
 
 class UserDetailedModal extends React.Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            open:false
+        };
+    }
+
+  close = () => this.setState({ open: false })
+  onopen = () => this.setState({ open: true })
   render() {
+    const { open } = this.state
     return (
-        <Modal className="productmodal" trigger={<Button positive>Details</Button>} centered={false}>
+        <Modal open={open} onClose={this.close} className="productmodal" trigger={<Button onClick={() => this.onopen()} positive>Details</Button>} centered={false}>
             <Modal.Header>UserInfo</Modal.Header>
             <Modal.Content image>
                 <Grid>
@@ -25,7 +36,7 @@ class UserDetailedModal extends React.Component {
                 </Grid>
             </Modal.Content>
             <Modal.Actions>
-                <Button positive icon='checkmark' labelPosition='right' content='Close' />
+                <Button positive icon='checkmark' labelPosition='right' content='Close' onClick={() => this.close()}/>
             </Modal.Actions>
         </Modal>
     );

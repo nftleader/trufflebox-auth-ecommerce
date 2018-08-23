@@ -106,13 +106,14 @@ export function loginUser() {
           authenticationInstance = instance
 
           // Attempt to login user.
+          let obj = {};
           authenticationInstance.login({from: coinbase})
           .then(function(result) {
             // If no error, login user.
             const [ name, email, phoneNumber, profilePicture, userType, userState ] = result;
             let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
             let userStatus = ["Pending", "Approved"];
-            let obj = {
+            obj = {
               name: web3.toUtf8(name),
               email: web3.toUtf8(email),
               phoneNumber: web3.toUtf8(phoneNumber),
@@ -132,7 +133,6 @@ export function loginUser() {
               //dispatch(userLoggedIn(obj));
               return getDataForOwner(authenticationInstance, coinbase);
             }
-
           }).then(function(result){ //finshed getting product
             if(result)  dispatch(result);
 
@@ -144,9 +144,19 @@ export function loginUser() {
             {
               return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
             }
-
-            return browserHistory.push('/dashboard')
-
+            if( obj.userType === "Buyer"){
+              //dispatch(userLoggedIn(obj));
+              return browserHistory.push('/dashboard')
+            }else if( obj.userType === "Seller"){
+              //dispatch(userLoggedIn(obj));
+              return browserHistory.push('/dashboard')
+            }else if( obj.userType === "Arbiter"){
+              //dispatch(userLoggedIn(obj));
+              return browserHistory.push('/dashboard')
+            }else if( obj.userType === "Owner"){
+              //dispatch(userLoggedIn(obj));
+              return browserHistory.push('/')
+            }
           })
           .catch(function(error) {
             // If error, go to signup page.
