@@ -265,7 +265,7 @@ export function loginUser() {
               return browserHistory.push('/dashboard')
             }else if( obj.userType === "Seller"){
               //dispatch(userLoggedIn(obj));
-              return browserHistory.push('/dashboard')
+              return browserHistory.push('/')
             }else if( obj.userType === "Arbiter"){
               //dispatch(userLoggedIn(obj));
               return browserHistory.push('/dashboard')

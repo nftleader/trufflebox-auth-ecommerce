@@ -32,6 +32,9 @@ class App extends Component {
     const OnlySellerLinks = VisibleOnlySeller(()=>
       <span>
         <li className="pure-menu-item">
+          <Link activeClassName="actives" to="/" className="pure-menu-link">Home</Link>
+        </li>
+        <li className="pure-menu-item">
           <Link activeClassName="actives" to="/store" className="pure-menu-link">Store</Link>
         </li>
         <li className="pure-menu-item">

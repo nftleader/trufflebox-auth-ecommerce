@@ -11,33 +11,9 @@ class Dashboard extends Component {
 
     this.state = {};
     this.state.col = [1,4,3,1,1]
-    this.state.datas = [{
-      name: 'aaa',
-      email: 'email1.e.com',
-      address: 'address1',
-      userType: 'Buyer',
-      userState: 'Pending'
-    }, {
-      name: '21433214',
-      email: 'email2.e.com',
-      address: 'address1',
-      userType: 'Seller',
-      userState: 'Pending'
-    }, {
-      name: '334354654',
-      email: 'email3.e.com',
-      address: 'address1',
-      userType: 'Owner',
-      userState: 'Approved'
-    }];
+    this.state.datas = [];
     
     this.state.contactInfo = {
-      address: "adskflasjdf",
-      abi: "klsdjflksdf",
-      balance: "0.1 ETH",
-      stores: 97,
-      sellers: 98,
-      admins: 99,
     }
   }
 
@@ -69,6 +45,7 @@ class Dashboard extends Component {
     else
       return (<Button onClick={() => this.onClickUserType(tgtType, id)}>{tgtType}</Button>);
   }
+
   showTypeBtns(type, id) {
     return (
       <Table.Cell>
