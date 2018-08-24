@@ -64,15 +64,15 @@ contract Ecommerce is Ownable, ReentryProtector {
     enum ProductState {ForSale, Sold, Shipped, Received, Deleted}
     struct Product {
         uint id;
-        bytes32 name;
-        bytes32 category;
-        bytes32 imageLink;
-        bytes32 descLink;
-        uint startTime;
-        uint price;
+        bytes32 name;//
+        bytes32 category;//
+        bytes32 imageLink;//
+        bytes32 descLink;//
+        uint startTime;//
+        uint price;//
         address buyer;
-        ProductCondition productCondition;
-        ProductState productState;
+        ProductCondition productCondition;//
+        ProductState productState;//
         bool exists;
     }
     
