@@ -31,7 +31,7 @@ class Orders extends Component {
       <main className="container">
         <div className="row">
           <div className="col-md-12">
-            <h3>User Information</h3>
+            <h3>Orders</h3>
             <Table celled structured>
               <Table.Header>
                 <Table.Row>

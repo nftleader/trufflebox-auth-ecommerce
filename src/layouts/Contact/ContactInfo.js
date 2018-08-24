@@ -21,7 +21,7 @@ class ContactInfo extends Component {
       <main className="container">
         <div className="pure-g">
           <div className="pure-u-1-1">
-            <h1>Contact Info</h1>
+            <h1>Contract Info</h1>
           </div>
         </div>
         <div className="row">

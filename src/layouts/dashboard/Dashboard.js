@@ -10,7 +10,7 @@ class Dashboard extends Component {
     super(props)
 
     this.state = {};
-    this.state.col = [1,4,3,1,1]
+    this.state.col = [4,4,1,1,2]
     this.state.datas = [];
     
     this.state.contactInfo = {
@@ -20,11 +20,11 @@ class Dashboard extends Component {
   componentDidMount() {
     this.setState({
       contactInfo: {
-        admins:   this.props.dashboard.data.arbiterCount,
         address:  this.props.dashboard.data.contractData.address,
         balance:  this.props.dashboard.data.balance,
-        stores: 0,
+        arbiters:   this.props.dashboard.data.arbiterCount,
         sellers: this.props.dashboard.data.sellerCount,
+        stores: 0,
       }
     });
     this.setState({
@@ -99,7 +99,7 @@ class Dashboard extends Component {
       <main className="container">
         <div className="row">
           <div className="col-md-12">
-            <h3>Contact Info</h3>
+            <h3>Contract Info</h3>
             <Grid>
               {Object.keys(this.state.contactInfo).map((key, index) => 
                 <Grid.Column width={this.state.col[index]} key={key}>
@@ -113,7 +113,7 @@ class Dashboard extends Component {
         </div>
         <div className="row">
           <div className="col-md-12">
-            <h3>User Information</h3>
+            <h3>Users</h3>
             <Table celled structured textAlign = 'center'>
               <Table.Header>
                 <Table.Row>
@@ -156,7 +156,7 @@ class Dashboard extends Component {
 }
 
 const mapStateToProps = state => ({
-  dashboard: state.owner
+  dashboard: state.common
 })
 
 const mapDispatchToProps = dispatch => ({

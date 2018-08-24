@@ -39,7 +39,7 @@ export function changeUserState(status, userid) {
                 authentication.deployed().then(function(instance) {
                     authenticationInstance = instance
                     let index = 0;
-                    let userdata = store.getState().owner.data.userData;
+                    let userdata = store.getState().common.data.userData;
                     userdata.forEach((key, i) => {
                         if(key.id === userid) index = i;
                     });
@@ -83,7 +83,7 @@ export function changeUserType(type, userid) {
                 authentication.deployed().then(function(instance) {
                     authenticationInstance = instance
                     let index = 0;
-                    let userdata = store.getState().owner.data.userData;
+                    let userdata = store.getState().common.data.userData;
                     userdata.forEach((key, i) => {
                         if(key.id === userid) index = i;
                     });

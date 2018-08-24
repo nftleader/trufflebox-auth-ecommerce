@@ -7,7 +7,7 @@ import store from '../../../store'
 const contract = require('truffle-contract')
 
 export const USER_LOGGED_IN = 'USER_LOGGED_IN'
-export const OWNER_LOGGED_IN = 'OWNER_LOGGED_IN'
+export const COMMON_DATA = 'COMMON_DATA'
 function userLoggedIn(user) {
   return {
     type: USER_LOGGED_IN,
@@ -22,9 +22,9 @@ const USER_TYPES        = ["Buyer", "Seller", "Arbiter", "Owner"];
 const USER_STATUS       = ["Pending", "Approved"];
 
 
-let getDataForOwner = async function(authenticationInstance, coinbase){
-  let OwnerObj = {
-    type: OWNER_LOGGED_IN,
+let getCommonData = async function(authenticationInstance, coinbase){
+  let CommonObj = {
+    type: COMMON_DATA,
     payload:{
       contractData:{
         address: "0x0",
@@ -46,12 +46,12 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
   let web3 = store.getState().web3.web3Instance;
 
   //contract info
-  OwnerObj.payload.contractData.address = authenticationInstance.address;
-  OwnerObj.payload.contractData.abi = authenticationInstance.abi;
+  CommonObj.payload.contractData.address = authenticationInstance.address;
+  CommonObj.payload.contractData.abi = authenticationInstance.abi;
   //admin balance
   await web3.eth.getBalance(coinbase, (err, res) => {
     if (err) { Promise.reject(err) }
-    OwnerObj.payload.balance = web3.fromWei(res.toString(10), "ether");
+    CommonObj.payload.balance = web3.fromWei(res.toString(10), "ether");
     Promise.resolve(res);
   });
 
@@ -79,18 +79,18 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
       if(obj.userType === "Seller") sellerCount++;
       if(obj.userType === "Arbiter") arbiterCount++;
       console.log("***********  users obj: ", obj);
-      OwnerObj.payload.userData.push(obj);
+      CommonObj.payload.userData.push(obj);
     }catch(err){
       console.log("missing user id ", i);
       console.log("error ", err);
       continue;
     }
   }
-  OwnerObj.payload.userCount = usersCount;
-  OwnerObj.payload.sellerCount = sellerCount;
-  OwnerObj.payload.arbiterCount = arbiterCount;
+  CommonObj.payload.userCount = usersCount;
+  CommonObj.payload.sellerCount = sellerCount;
+  CommonObj.payload.arbiterCount = arbiterCount;
 
-  console.log("***********  return obj: ", OwnerObj);
+  console.log("***********  return obj: ", CommonObj);
 
   //get product list
 
@@ -136,7 +136,7 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
       };
 
       console.log("***********  product obj: ", obj);
-      OwnerObj.payload.productData.push(obj);
+      CommonObj.payload.productData.push(obj);
     }catch(err){
       console.log("missing product id ", i);
       console.log("error ", err);
@@ -162,7 +162,7 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
         productCount: productCount.toNumber()
       };
       console.log("***********  store obj: ", obj);
-      OwnerObj.payload.storeData.push(obj);
+      CommonObj.payload.storeData.push(obj);
     }catch(err){
       console.log("missing product id ", i);
       console.log("error ", err);
@@ -173,7 +173,7 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
 
   for(let i = 1; i <= productCount; i++){
     try{
-      let product = OwnerObj.payload.productData[i];
+      let product = CommonObj.payload.productData[i];
       if(product && PRODUCT_CONDITION[product.productCondition] != "ForSale" && PRODUCT_CONDITION[product.productCondition] != "Deleted" ){
         let [buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(i);
         let escrowobj = {
@@ -185,7 +185,7 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
           refundCount: refundCount          
         };
         console.log("***********  store obj: ", escrowobj);
-        OwnerObj.payload.escrowData.push(escrowobj);
+        CommonObj.payload.escrowData.push(escrowobj);
       }
     }catch(err){
       console.log("error ", err);
@@ -193,7 +193,7 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
     }
   }
 
-  return OwnerObj;
+  return CommonObj;
 }
 
 
@@ -239,16 +239,16 @@ export function loginUser() {
             };
             console.log(obj);
             dispatch(userLoggedIn(obj));
-            if( obj.userType === "Buyer"){
-              //dispatch(userLoggedIn(obj));
-            }else if( obj.userType === "Seller"){
-              //dispatch(userLoggedIn(obj));
-            }else if( obj.userType === "Arbiter"){
-              //dispatch(userLoggedIn(obj));
-            }else if( obj.userType === "Owner"){
-              //dispatch(userLoggedIn(obj));
-              return getDataForOwner(authenticationInstance, coinbase);
-            }
+            // if( obj.userType === "Buyer"){
+            //   //dispatch(userLoggedIn(obj));
+            // }else if( obj.userType === "Seller"){
+            //   //dispatch(userLoggedIn(obj));
+            // }else if( obj.userType === "Arbiter"){
+            //   //dispatch(userLoggedIn(obj));
+            // }else if( obj.userType === "Owner"){
+            //   //dispatch(userLoggedIn(obj));
+            // }
+            return getCommonData(authenticationInstance, coinbase);
           }).then(function(result){ //finshed getting product
             if(result)  dispatch(result);
 
@@ -261,17 +261,13 @@ export function loginUser() {
               return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
             }
             if( obj.userType === "Buyer"){
-              //dispatch(userLoggedIn(obj));
-              return browserHistory.push('/dashboard')
+              return browserHistory.push('/home')
             }else if( obj.userType === "Seller"){
-              //dispatch(userLoggedIn(obj));
-              return browserHistory.push('/')
+              return browserHistory.push('/home')
             }else if( obj.userType === "Arbiter"){
-              //dispatch(userLoggedIn(obj));
-              return browserHistory.push('/dashboard')
+              return browserHistory.push('/home')
             }else if( obj.userType === "Owner"){
-              //dispatch(userLoggedIn(obj));
-              return browserHistory.push('/')
+              return browserHistory.push('/home')
             }
           })
           .catch(function(error) {
