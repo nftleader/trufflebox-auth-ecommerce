@@ -12,7 +12,7 @@ class ContactInfo extends Component {
       balance: "0.1 ETH",
       stores: 97,
       sellers: 98,
-      admins: 99,
+      arbiters: 99,
     }
   }
 

@@ -77,7 +77,7 @@ class Dashboard extends Component {
           <Button.Or />
           {this.showTypeBtn(type, 'Seller', 'Seller', id)}
           <Button.Or />
-          {this.showTypeBtn(type, 'Owner', 'Owner', id)}
+          {this.showTypeBtn(type, 'Arbiter', 'Arbiter', id)}
         </Button.Group>
       </Table.Cell>);
   }
@@ -149,8 +149,8 @@ class Dashboard extends Component {
                   <Table.HeaderCell colSpan='3'>Action</Table.HeaderCell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.HeaderCell>Change user Type</Table.HeaderCell>
-                  <Table.HeaderCell>Change user state</Table.HeaderCell>
+                  <Table.HeaderCell>Change User State</Table.HeaderCell>
+                  <Table.HeaderCell>Change User Type</Table.HeaderCell>
                   <Table.HeaderCell>Details</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>

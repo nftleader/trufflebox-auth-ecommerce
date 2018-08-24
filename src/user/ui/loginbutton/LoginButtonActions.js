@@ -1,4 +1,6 @@
 import AuthenticationContract from '../../../../build/contracts/Authentication.json'
+import EcommerceContract from '../../../../build/contracts/Ecommerce.json'
+
 import { browserHistory } from 'react-router'
 import store from '../../../store'
 
@@ -13,6 +15,13 @@ function userLoggedIn(user) {
   }
 }
 
+
+const PRODUCT_CONDITION = ["New", "Used"];
+const PRODUCT_STATE     = ["ForSale", "Sold", "Shipped", "Received", "Deleted"];
+const USER_TYPES        = ["Buyer", "Seller", "Arbiter", "Owner"];
+const USER_STATUS       = ["Pending", "Approved"];
+
+
 let getDataForOwner = async function(authenticationInstance, coinbase){
   let OwnerObj = {
     type: OWNER_LOGGED_IN,
@@ -25,7 +34,12 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
       userCount: 0,
       arbiterCount: 0,
       sellerCount: 0,
-      userData:[]
+
+      userData:[],
+      productData:[],
+      storeData:[],
+      orderData:[],
+      escrowData:[]
     }
   };
 
@@ -41,6 +55,8 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
     Promise.resolve(res);
   });
 
+  //get user list
+
   const usersCountBigNumber = await authenticationInstance.usersCount.call();
   let usersCount = usersCountBigNumber.toNumber();
   let arbiterCount = 0;
@@ -50,8 +66,6 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
   for(let i = 1; i <= usersCount; i++){
     try{
       const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authenticationInstance.getUser(i);
-      let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
-      let userStatus = ["Pending", "Approved"];
       let obj = {
         id : i,
         address: address,
@@ -59,8 +73,8 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
         email: web3.toUtf8(email),
         phoneNumber:web3.toUtf8(phoneNumber),
         profilePicture: web3.toUtf8(profilePicture),
-        userType: userTypes[userType.toNumber()],
-        userState: userStatus[userState.toNumber()]
+        userType: USER_TYPES[userType.toNumber()],
+        userState: USER_STATUS[userState.toNumber()]
       };
       if(obj.userType === "Seller") sellerCount++;
       if(obj.userType === "Arbiter") arbiterCount++;
@@ -78,8 +92,110 @@ let getDataForOwner = async function(authenticationInstance, coinbase){
 
   console.log("***********  return obj: ", OwnerObj);
 
+  //get product list
+
+/*  let prod = {
+      id: id,
+      name: name,
+      category: category,
+      imageLink: imageLink,
+      descLink: descLink,
+      startTime: startTime,
+      price: price,
+      buyer: buyer,
+      productCondition: productCondition,
+      productState: productState,
+      exists: exists,
+  }*/
+  
+  const Ecommerce = contract(EcommerceContract)
+  Ecommerce.setProvider(web3.currentProvider)
+  const ecommerce = await Ecommerce.deployed();
+  
+  const productCount = (await ecommerce.productCount.call()).toNumber();
+
+  console.log("productCount:", productCount);
+
+  for(let i = 1; i <= productCount; i++){
+    try{
+      let [ id, name, category, startTime, price, buyer, productCondition, productState] = await ecommerce.getProduct(i);
+      let [ imageLink, descLink] = await ecommerce.getProductDetails(i);
+
+
+      let obj = {
+        id: i,
+        name: web3.toUtf8(name),
+        category: web3.toUtf8(category),
+        imageLink: web3.toUtf8(imageLink),
+        descLink: web3.toUtf8(descLink),
+        startTime: startTime.toNumber(),
+        price: price.toNumber(),
+        buyer: web3.toUtf8(buyer),
+        productCondition: PRODUCT_CONDITION[productCondition],
+        productState: PRODUCT_STATE[productState],
+      };
+
+      console.log("***********  product obj: ", obj);
+      OwnerObj.payload.productData.push(obj);
+    }catch(err){
+      console.log("missing product id ", i);
+      console.log("error ", err);
+      continue;
+    }
+  }
+
+  //get store list
+  const storeCount = (await ecommerce.storesCount.call()).toNumber();
+
+  console.log("storeCount:", storeCount);
+
+  for(let i = 1; i <= storeCount; i++){
+    try{
+      let [ storeAddress, name, email, arbiter, storeFrontImage, balance, productCount] = await ecommerce.storesById.call(i);
+      let obj = {
+        storeAddress: web3.toUtf8(storeAddress),
+        name: web3.toUtf8(name),
+        email: web3.toUtf8(email),
+        arbiter: web3.toUtf8(arbiter),
+        storeFrontImage: web3.toUtf8(storeFrontImage),
+        balance: web3.fromWei(balance.toString(10), "ether"),
+        productCount: productCount.toNumber()
+      };
+      console.log("***********  store obj: ", obj);
+      OwnerObj.payload.storeData.push(obj);
+    }catch(err){
+      console.log("missing product id ", i);
+      console.log("error ", err);
+      continue;
+    }
+  }
+
+
+  for(let i = 1; i <= productCount; i++){
+    try{
+      let product = OwnerObj.payload.productData[i];
+      if(product && PRODUCT_CONDITION[product.productCondition] != "ForSale" && PRODUCT_CONDITION[product.productCondition] != "Deleted" ){
+        let [buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(i);
+        let escrowobj = {
+          buyer: buyer,
+          seller: seller,
+          arbiter: arbiter,
+          fundsDisbursed: fundsDisbursed,
+          releaseCount: releaseCount,
+          refundCount: refundCount          
+        };
+        console.log("***********  store obj: ", escrowobj);
+        OwnerObj.payload.escrowData.push(escrowobj);
+      }
+    }catch(err){
+      console.log("error ", err);
+      continue;
+    }
+  }
+
   return OwnerObj;
 }
+
 
 export function loginUser() {
   let web3 = store.getState().web3.web3Instance
