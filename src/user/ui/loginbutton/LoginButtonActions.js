@@ -177,6 +177,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
       if(product && PRODUCT_CONDITION[product.productCondition] != "ForSale" && PRODUCT_CONDITION[product.productCondition] != "Deleted" ){
         let [buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(i);
         let escrowobj = {
+          product_id: product.id,
           buyer: buyer,
           seller: seller,
           arbiter: arbiter,
@@ -261,13 +262,13 @@ export function loginUser() {
               return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
             }
             if( obj.userType === "Buyer"){
-              return browserHistory.push('/home')
+              return browserHistory.push('/')
             }else if( obj.userType === "Seller"){
-              return browserHistory.push('/home')
+              return browserHistory.push('/')
             }else if( obj.userType === "Arbiter"){
               return browserHistory.push('/home')
             }else if( obj.userType === "Owner"){
-              return browserHistory.push('/home')
+              return browserHistory.push('/')
             }
           })
           .catch(function(error) {

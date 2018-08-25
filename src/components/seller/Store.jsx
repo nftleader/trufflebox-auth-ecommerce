@@ -313,7 +313,7 @@ class Store extends Component {
                                     <List>
                                         {pro.map((key, index) => {
                                             return(
-                                                <List.Item>
+                                                <List.Item key={index}>
                                                     {key.name}
                                                 </List.Item>
                                             )

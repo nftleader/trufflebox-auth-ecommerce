@@ -4,17 +4,19 @@ import logger from 'redux-logger'
 import thunkMiddleware from 'redux-thunk'
 import { routerMiddleware } from 'react-router-redux'
 import reducer from './reducer'
+import Initial from './initialstate.json'
 
 // Redux DevTools
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-const routingMiddleware = routerMiddleware(browserHistory)
+const routingMiddleware = routerMiddleware(browserHistory) 
 
 const store = createStore(
   reducer,
+  {common:{data:Initial}},
   composeEnhancers(
     applyMiddleware(
-//      logger,
+//    logger,
       thunkMiddleware,
       routingMiddleware
     )

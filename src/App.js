@@ -38,7 +38,7 @@ class App extends Component {
           <Link activeClassName="actives" to="/store" className="pure-menu-link">Store</Link>
         </li>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/product" className="pure-menu-link">Product</Link>
+          <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
         </li>
         <LogoutButtonContainer role="Seller"/>
       </span>
@@ -50,9 +50,12 @@ class App extends Component {
           <Link activeClassName="actives" to="/" className="pure-menu-link">Store</Link>
         </li>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/" className="pure-menu-link">Product</Link>
+          <Link activeClassName="actives" to="/orders" className="pure-menu-link">Order</Link>
         </li>
-        <LogoutButtonContainer />
+        <li className="pure-menu-item">
+          <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
+        </li>
+        <LogoutButtonContainer role="Buyer"/>
       </span>
     )
 

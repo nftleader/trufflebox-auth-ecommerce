@@ -6,9 +6,9 @@ const CommonReducer = (state = initialState, action) => {
     if (action.type === 'COMMON_DATA'){
         console.log('track_1');
         console.log(action);
-        return Object.assign({}, state, {
-            data: action.payload
-        })
+        //When back-end is ready it will be removed
+        action.payload.productData = state.data.productData
+        return { ...state, ...{data:action.payload}}  
     }
     
     if (action.type === 'CHANGE_USER_STATE') {

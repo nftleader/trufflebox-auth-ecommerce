@@ -1,0 +1,95 @@
+{
+    "productData" : [
+        {
+            "id": 1,
+            "name": "test_name1",
+            "category": "cate1",
+            "imageLink": "test_iamgeLink_1",
+            "descLink": "test_descLink_1",
+            "startTime": "test_startTime_1",
+            "price":    "test_price_1",
+            "buyer":    "test_buyer_1",
+            "productCondition": "1",
+            "productState": "1",
+            "exists": "test_exists_1"
+        },
+        {
+            "id": 2,
+            "name": "test_name22",
+            "category": "cate2",
+            "imageLink": "test_iamgeLink_2",
+            "descLink": "test_descLink_2",
+            "startTime": "test_startTime_2",
+            "price":    "test_price_2",
+            "buyer":    "test_buyer_2",
+            "productCondition": "1",
+            "productState": "1",
+            "exists": "test_exists_2"
+        },
+        {
+            "id": 3,
+            "name": "test_name3",
+            "category": "cate3",
+            "imageLink": "test_iamgeLink_3",
+            "descLink": "test_descLink_3",
+            "startTime": "test_startTime_3",
+            "price":    "test_price_3",
+            "buyer":    "test_buyer_3",
+            "productCondition": "1",
+            "productState": "0",
+            "exists": "test_exists_3"
+        },
+        {
+            "id": 4,
+            "name": "test_name4",
+            "category": "cate4",
+            "imageLink": "test_iamgeLink_4",
+            "descLink": "test_descLink_4",
+            "startTime": "test_startTime_4",
+            "price":    "test_price_4",
+            "buyer":    "test_buyer_4",
+            "productCondition": "1",
+            "productState": "1",
+            "exists": "test_exists_4"
+        },
+        {
+            "id": 5,
+            "name": "test_name5",
+            "category": "cate4",
+            "imageLink": "test_iamgeLink_5",
+            "descLink": "test_descLink_5",
+            "startTime": "test_startTime_5",
+            "price":    "test_price_5",
+            "buyer":    "test_buyer_5",
+            "productCondition": "1",
+            "productState": "2",
+            "exists": "test_exists_5"
+        },
+        {
+            "id": 6,
+            "name": "test_name6",
+            "category": "cate4",
+            "imageLink": "test_iamgeLink_6",
+            "descLink": "test_descLink_6",
+            "startTime": "test_startTime_6",
+            "price":    "test_price_6",
+            "buyer":    "test_buyer_6",
+            "productCondition": "1",
+            "productState": "1",
+            "exists": "test_exists_6"
+        },
+        {
+            "id": 7,
+            "name": "test_name7",
+            "category": "cate4",
+            "imageLink": "test_iamgeLink_7",
+            "descLink": "test_descLink_7",
+            "startTime": "test_startTime_7",
+            "price":    "test_price_7",
+            "buyer":    "test_buyer_7",
+            "productCondition": "1",
+            "productState": "1",
+            "exists": "test_exists_7"
+        }
+    ]
+}

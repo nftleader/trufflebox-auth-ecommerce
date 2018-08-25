@@ -19,6 +19,8 @@ export function CreateStore(data) {
     if (typeof web3 !== 'undefined') {
 
         return function(dispatch) {
+            dispatch(storecreate(data));
+            return;
           // Using truffle-contract we create the authentication object.
           const authentication = contract(AuthenticationContract)
           authentication.setProvider(web3.currentProvider)
