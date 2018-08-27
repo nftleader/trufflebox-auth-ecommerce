@@ -42,7 +42,7 @@ contract Ecommerce is Ownable, ReentryProtector {
     
     mapping (uint => Store) public storesById;                   // Stores by id
     mapping (address => mapping(uint => Product)) public stores; // products by stores
-    mapping (uint => address) public storesByProductId;          // store by product Id
+    mapping (uint => address) public storesByProductId;          // seller address by product id
     mapping (address => uint) public storesBySellers;            // store by seller address, used to prevent more than one store per user
     mapping (address => uint) public productCountByStore;        // product count by store
     mapping (uint => address) public productsEscrow;             // product escrow control
@@ -173,11 +173,11 @@ contract Ecommerce is Ownable, ReentryProtector {
             productCount,
             _name, 
             _category, 
-            "", 
-            "", 
+            "empty", 
+            "empty", 
             _startTime, 
             _price, 
-            0, 
+            0x0, 
             ProductCondition(_productCondition),  
             ProductState.ForSale,
             true
@@ -315,16 +315,17 @@ contract Ecommerce is Ownable, ReentryProtector {
         checkValue(_id)
 
     {
-        externalEnter();
-        Product memory product = stores[storesByProductId[_id]][_id]; // load product
-
-        product.buyer = msg.sender; // set de buyer 
-        product.productState = ProductState.Sold;
-        stores[storesByProductId[_id]][_id] = product; // update the product
-        emit LogSold("Product sold", _id);
         
-        initEscrow(_id, msg.value, msg.sender); // create Escrow contract       
+        externalEnter();
 
+        stores[storesByProductId[_id]][_id].buyer = msg.sender;
+        stores[storesByProductId[_id]][_id].productState = ProductState.Sold;
+        emit LogSold("Product sold", _id);
+
+        //function initEscrow(uint _id, uint _value, address _buyer)
+        
+        initEscrow(_id, stores[storesByProductId[_id]][_id].price, msg.sender); // create Escrow contract       
+        
         externalLeave();
     }
 
@@ -368,7 +369,7 @@ contract Ecommerce is Ownable, ReentryProtector {
         external
         productExists(_id)
         view 
-        returns (address, address, address, bool, uint, uint)
+        returns (address, address, address, uint, bool, uint, uint)
     {
         return Escrow(productsEscrow[_id]).escrowDetails();
     }
@@ -425,7 +426,8 @@ contract Ecommerce is Ownable, ReentryProtector {
         internal
     {
         // create escrow contract
-        
+        emit LogEscrowCreated(_value, _buyer, 0x0, 0x0);
+
         Escrow escrow = (new Escrow).value(_value)(
             _id, 
             _buyer,
