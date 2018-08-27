@@ -261,7 +261,9 @@ export function loginUser() {
             {
               return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
             }
-            if( obj.userType === "Buyer"){
+            return browserHistory.push('/profile')
+
+/*            if( obj.userType === "Buyer"){
               return browserHistory.push('/')
             }else if( obj.userType === "Seller"){
               return browserHistory.push('/')
@@ -269,7 +271,7 @@ export function loginUser() {
               return browserHistory.push('/home')
             }else if( obj.userType === "Owner"){
               return browserHistory.push('/')
-            }
+            }*/
           })
           .catch(function(error) {
             // If error, go to signup page.
