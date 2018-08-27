@@ -1,5 +1,6 @@
 {
     "userData" : [
+        {},
         {
             "id": 1,
             "address" : "0x first buyer",
@@ -90,6 +91,7 @@
         }
     ],
     "productData" : [
+        {},
         {
             "id": 1,
             "store_id" : 1, 
@@ -176,6 +178,7 @@
         }
     ],
     "storeData" : [
+        {},
         {
             "id" : 1,
             "storeAddress": "0xaaaaaaaaaaaaaaa",
@@ -199,6 +202,7 @@
     ],
     "myStoreID" : 0,
     "escrowData" : [
+        {},
         {
             "product_id": 3,
             "buyer_id": 1,

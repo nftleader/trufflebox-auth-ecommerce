@@ -6,6 +6,9 @@ import { routerMiddleware } from 'react-router-redux'
 import reducer from './reducer'
 import Initial from './initialstate.json'
 
+console.log("track_99")
+console.log(Initial)
+
 // Redux DevTools
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 

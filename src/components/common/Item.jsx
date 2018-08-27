@@ -5,46 +5,29 @@ import ItemModal from 'components/common/Modal'
 
 class PItem extends Component {
     render() {
+        console.log('track_pitem')
+        console.log(this.props)
         return (
             <div>
                 <Item.Group>
-                    <Item>
-                        <Item.Image size='small' src={ItemImage} />
-                        <Item.Content>
-                            <Item.Header><ItemModal/></Item.Header>
-                            <Item.Description>
-                            <p as='h5'>Price: 50$</p>
-                            <p as='h5'>Seller: oca</p>
-                            <p as='h5'>Condition: shop</p>
-                            </Item.Description>
-                        </Item.Content>
-                    </Item>
-
-                    <Item>
-                        <Item.Image size='small' src={ItemImage} />
-                        <Item.Content>
-                            <Item.Header><ItemModal/></Item.Header>
-                            <Item.Description>
-                            <p as='h5'>Price: 50$</p>
-                            <p as='h5'>Seller: oca</p>
-                            <p as='h5'>Condition: shop</p>
-                            </Item.Description>
-                        </Item.Content>
-                    </Item>
-
-                    <Item>
-                    <Item.Image size='small' src={ItemImage} />
-                        <Item.Content>
-                            <Item.Header><ItemModal/></Item.Header>
-                            <Item.Description>
-                            <p as='h5'>Price: 50$</p>
-                            <p as='h5'>Seller: oca</p>
-                            <p as='h5'>Condition: shop</p>
-                            </Item.Description>
-                        </Item.Content>
-                    </Item>
+                    {
+                        this.props.products.map((payload, index) => {
+                            return(
+                                <Item>
+                                    <Item.Image size='small' src={ItemImage} />
+                                    <Item.Content>
+                                        <Item.Header><ItemModal product={payload}/></Item.Header>
+                                        <Item.Description>
+                                            <p as='h5'>Name: {payload.name}</p>
+                                            <p as='h5'>Price: {payload.price}</p>
+                                            <p as='h5'>descLink: {payload.descLink}</p>
+                                        </Item.Description>
+                                    </Item.Content>
+                                </Item>
+                            )
+                        })
+                    }
                 </Item.Group>
-                
             </div>
         )
     }

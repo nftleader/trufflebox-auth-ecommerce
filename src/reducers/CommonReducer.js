@@ -3,6 +3,8 @@ const initialState = {
 }
 
 const CommonReducer = (state = initialState, action) => {
+    console.log('track_commonreducer_1')
+    console.log(state)
     if (action.type === 'COMMON_DATA'){
         console.log('track_1');
         console.log(action);

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Container, Header } from 'semantic-ui-react'
-import Product from 'layouts/home/Product'
+import Product from 'components/common/Product'
 class AboutContractAndWebsite extends Component {
   render() {
     return(
