@@ -36,6 +36,22 @@ const CommonReducer = (state = initialState, action) => {
         console.log(mem);
         return {...state, ...mem };
     }
+
+    if(action.type === 'ESCROW_RELEASE'){
+        let newstate = {...state};
+        newstate.data.escrowData[action.data.id].release_count ++;
+        if(newstate.data.escrowData[action.data.id].release_count == 2){
+            newstate.data.escrowData[action.data.id].fundsDisbursed = true;
+        }
+        return newstate;
+    }
+
+    if(action.type === 'BUY_PRODUCT'){
+        let newstate = {...state};
+        newstate.data.productData[action.data.id] = action.data;
+        return newstate;
+    }
+
     return state
 }
 

@@ -7,22 +7,23 @@ body {
 .product{
   margin:0% 15% !important;
 }
-.productname{
+/*.productname{
   padding:2px !important;
   color:black !important;
 }
 .productmodal{
   height:450px !important;
 }
+*/
 .pagination{
   margin-left:50% !important;
 }
-.active {
-  color: green !important;
+/*.active {
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 .actives {
-  color: rgb(128, 109, 0) !important;
-}
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}*/
 .storeform {
   margin-top:5% !important;
 }

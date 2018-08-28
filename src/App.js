@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router'
-import { HiddenOnlyAuth, VisibleOnlyAuth,VisibleOnlySeller, VisibleOnlyBuyer, VisibleOnlyOwner, VisibleOnlyAdmin } from './util/wrappers.js'
+import { HiddenOnlyAuth, VisibleOnlyAuth,VisibleOnlySeller, VisibleOnlyBuyer, VisibleOnlyOwner, VisibleOnlyArbiter } from './util/wrappers.js'
 
 // UI Components
 import LoginButtonContainer from './user/ui/loginbutton/LoginButtonContainer'
@@ -32,10 +32,13 @@ class App extends Component {
     const OnlySellerLinks = VisibleOnlySeller(()=>
       <span>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/" className="pure-menu-link">Home</Link>
+          <Link activeClassName="active" to="/" className="pure-menu-link">Home</Link>
         </li>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/store" className="pure-menu-link">Store</Link>
+          <Link activeClassName="active" to="/store" className="pure-menu-link">Store</Link>
+        </li>
+        <li className="pure-menu-item">
+          <Link activeClassName="active" to="/orders" className="pure-menu-link">Orders</Link>
         </li>
         <li className="pure-menu-item">
           <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
@@ -47,10 +50,10 @@ class App extends Component {
     const OnlyBuyerLinks = VisibleOnlyBuyer(()=>
       <span>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/" className="pure-menu-link">Store</Link>
+          <Link activeClassName="active" to="/" className="pure-menu-link">Home</Link>
         </li>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/orders" className="pure-menu-link">Order</Link>
+          <Link activeClassName="active" to="/orders" className="pure-menu-link">Orders</Link>
         </li>
         <li className="pure-menu-item">
           <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
@@ -62,7 +65,7 @@ class App extends Component {
     const OnlyOwnerLinks = VisibleOnlyOwner(()=>
       <span>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/" className="pure-menu-link">Home</Link>
+          <Link activeClassName="active" to="/" className="pure-menu-link">Home</Link>
         </li>
         <li className="pure-menu-item">
           <Link activeClassName="active" to="/dashboard" className="pure-menu-link">Dashboard</Link>
@@ -74,18 +77,18 @@ class App extends Component {
       </span>
     )
 
-    const OnlyAdminLinks = VisibleOnlyAdmin(()=>
+    const OnlyArbiterLinks = VisibleOnlyArbiter(()=>
       <span>
         <li className="pure-menu-item">
-          <Link activeClassName="actives" to="/" className="pure-menu-link">Home</Link>
+          <Link activeClassName="active" to="/" className="pure-menu-link">Home</Link>
         </li>
         <li className="pure-menu-item">
-          <Link activeClassName="active" to="/dashboard" className="pure-menu-link">Dashboard</Link>
+          <Link activeClassName="active" to="/orders" className="pure-menu-link">Orders</Link>
         </li>
         <li className="pure-menu-item">
           <Link activeClassName="active" to="/profile" className="pure-menu-link">Account</Link>
         </li>
-        <LogoutButtonContainer role="Owner" />
+        <LogoutButtonContainer role="Arbiter" />
       </span>
     )
 
@@ -106,7 +109,7 @@ class App extends Component {
             <OnlySellerLinks/>
             <OnlyBuyerLinks/>
             <OnlyOwnerLinks/>
-            <OnlyAdminLinks/>
+            <OnlyArbiterLinks/>
           </ul>
           <Link  className="pure-menu-heading pure-menu-link">markEth</Link>
         </nav>

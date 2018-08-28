@@ -54,9 +54,9 @@ export const VisibleOnlyOwner = UserAuthWrapper({
   FailureComponent: null
 })
 
-export const VisibleOnlyAdmin = UserAuthWrapper({
+export const VisibleOnlyArbiter = UserAuthWrapper({
   authSelector: state => state.user.data,
-  wrapperDisplayName: 'VisibleOnlyAdmin',
+  wrapperDisplayName: 'VisibleOnlyArbiter',
   predicate: data => data.userType === 'Arbiter',
   FailureComponent: null
 })

@@ -1,29 +1,19 @@
 import React, { Component } from 'react'
 import { Table, Button, Grid } from 'semantic-ui-react'
-import OrderDetailedModal from './OrderDetailedModal'
+import { connect } from 'react-redux'
 
+import Initial from '../../initialstate.json'
+
+import * as CommonAction from 'components/common/CommonAction'
+import { bindActionCreators } from 'redux'
 class Orders extends Component {
   constructor(props) {
     super(props)
 
     this.state = {};
-    this.state.datas = [{
-      id: 100,
-      order: {
-        name: 'aaa',
-        price: 100,
-        condition: 'condition sjakdflsdf',
-        seller: 'James',
-        status: 'Pending'
-      },
-      escrow: {
-        arbiter: 'arbigfdg',
-        releaseAmount: 100,
-        refundAmount: 98,
-        fundsDisbursed: 'dsfsdfdsf',
-        state: 'Pending'
-      }
-    }];
+    if(this.props.store.user.data.myID){
+      console.log("this.props.store.user.data.myID ", this.props.store.user.data.myID);
+    }
   }
 
   render() {
@@ -31,52 +21,59 @@ class Orders extends Component {
       <main className="container">
         <div className="row">
           <div className="col-md-12">
-            <h3>Orders</h3>
+            <h1>Orders</h1>
             <Table celled structured>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell rowSpan='2'>No</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='6'>Order Info</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='5'>Escrow Info</Table.HeaderCell>
+                  <Table.HeaderCell colSpan='3'>Product Info</Table.HeaderCell>
+                  <Table.HeaderCell colSpan='8'>Escrow Info</Table.HeaderCell>
                   
-                  <Table.HeaderCell rowSpan='2'></Table.HeaderCell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.HeaderCell>Product Name</Table.HeaderCell>
+                  <Table.HeaderCell>Name</Table.HeaderCell>
                   <Table.HeaderCell>Price</Table.HeaderCell>
-                  <Table.HeaderCell>Condition</Table.HeaderCell>
-                  <Table.HeaderCell>Seller</Table.HeaderCell>
-                  <Table.HeaderCell>Order Status</Table.HeaderCell>
-                  <Table.HeaderCell>Buy product</Table.HeaderCell>
+                  <Table.HeaderCell>Status</Table.HeaderCell>
 
+                  <Table.HeaderCell>Buyer</Table.HeaderCell>
                   <Table.HeaderCell>Arbiter</Table.HeaderCell>
-                  <Table.HeaderCell>Release amount</Table.HeaderCell>
-                  <Table.HeaderCell>Refund amount</Table.HeaderCell>
+                  <Table.HeaderCell>Seller</Table.HeaderCell>
+                  <Table.HeaderCell>Escrow amount</Table.HeaderCell>
+                  <Table.HeaderCell>Release count</Table.HeaderCell>
+                  <Table.HeaderCell>Refund count</Table.HeaderCell>
                   <Table.HeaderCell>Funds disbursed</Table.HeaderCell>
                   <Table.HeaderCell>Escrow state</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
 
               <Table.Body>
-              {this.state.datas.map((item, index) => {
-                return ( <Table.Row key={item.id}>
-                          <Table.Cell>{index + 1}</Table.Cell>
+              {this.props.common.escrowData.map((item, index) => {
+                if( index > 0
+                  && ((this.props.store.user.userType === "Buyer" && item.buyer_id == this.props.common.myID)
+                      || (this.props.store.user.userType === "Seller" && item.seller_id == this.props.common.myID)
+                      || (this.props.store.user.userType === "Arbiter" && item.arbiter_id == this.props.common.myID))
+                  && (item.fundsDisbursed == false))
+                //if(item.buyer_id == this.props.common.myID /*&& item.fundsDisbursed == false */)
+                  //return ( <Table.Row key={item.id}>
+                  return ( <Table.Row key={index}>
+                            <Table.Cell>{index + 1}</Table.Cell>
 
-                          <Table.Cell>{item.order.name}</Table.Cell>
-                          <Table.Cell>{item.order.price}</Table.Cell>
-                          <Table.Cell>{item.order.condition}</Table.Cell>
-                          <Table.Cell>{item.order.seller}</Table.Cell>
-                          <Table.Cell>{item.order.status}</Table.Cell>
-                          <Table.Cell><OrderDetailedModal info={item}/></Table.Cell>
-                          
-                          <Table.Cell>{item.escrow.arbiter}</Table.Cell>
-                          <Table.Cell>{item.escrow.releaseAmount}</Table.Cell>
-                          <Table.Cell>{item.escrow.refundAmount}</Table.Cell>
-                          <Table.Cell>{item.escrow.fundsDisbursed}</Table.Cell>
-                          <Table.Cell>{item.escrow.state}</Table.Cell>
-
-                          <Table.Cell><OrderDetailedModal info={item}/></Table.Cell>
-                        </Table.Row> )})
+                            <Table.Cell>{this.props.common.productData[item.product_id].name}</Table.Cell>
+                            <Table.Cell>{this.props.common.productData[item.product_id].price}</Table.Cell>
+                            <Table.Cell>{this.props.common.productData[item.product_id].productState}</Table.Cell>
+                            
+                            <Table.Cell>{this.props.common.userData[item.buyer_id].name}</Table.Cell>
+                            <Table.Cell>{this.props.common.userData[item.arbiter_id].name}</Table.Cell>
+                            <Table.Cell>{this.props.common.userData[item.seller_id].name}</Table.Cell>
+                            <Table.Cell>{item.amount}</Table.Cell>
+                            <Table.Cell>{item.refund_count}</Table.Cell>
+                            <Table.Cell>{item.release_count}</Table.Cell>
+                            <Table.Cell>{item.fundsDisbursed? "Yes" : "No"}</Table.Cell>
+                            <Table.Cell>
+                              <Button onClick={() => this.props.onClickRelease(item)}>Release</Button>
+                              <Button onClick={() => this.props.onClickRefund(item)}>Refund</Button>
+                            </Table.Cell>
+                          </Table.Row> )})
               }
               </Table.Body>
             </Table>
@@ -87,4 +84,22 @@ class Orders extends Component {
   }
 }
 
-export default Orders
+const mapStateToProps = state => ({
+  store: state,
+  //common: state.common.data
+  common: Initial
+})
+
+const mapDispatchToProps = dispatch => ({
+  action: bindActionCreators(CommonAction, dispatch),
+  // onClickRelease: (event) => {
+  //   event.preventDefault();
+  //   CommonAction.releaseEscrow()
+  // }
+  onClickRelease (item){
+    console.log("release: ", item);
+    dispatch(CommonAction.releaseEscrow(item));
+  }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Orders)

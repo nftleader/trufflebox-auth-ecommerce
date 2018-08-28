@@ -39,6 +39,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
       sellerCount: 0, 
 
       myStoreID: -1,
+      myID: 1,
 
       userData:[{}],    //to iterate from ONE
       productData:[{}],
@@ -182,6 +183,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
       if(product && PRODUCT_CONDITION[product.productCondition] != "ForSale" && PRODUCT_CONDITION[product.productCondition] != "Deleted" ){
         let [buyer, seller, arbiter, amount, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(product.id);
         let escrowobj = {
+          id: CommonObj.payload.escrowData.length,
           product_id: product.id,
           buyer: buyer,
           buyer_id: -1,
@@ -249,6 +251,7 @@ export function loginUser() {
             let userTypes = ["Buyer", "Seller", "Arbiter", "Owner"];
             let userStatus = ["Pending", "Approved"];
             obj = {
+              myID: 1, // zero?
               name: web3.toUtf8(name),
               email: web3.toUtf8(email),
               phoneNumber: web3.toUtf8(phoneNumber),
@@ -257,24 +260,36 @@ export function loginUser() {
               userState: userStatus[userState.toNumber()]
             };
             console.log(obj);
-            dispatch(userLoggedIn(obj));
             
             return getCommonData(authenticationInstance, coinbase);
           }).then(function(result){ //finshed getting сommon data
-            // now get some role specific data
-            if( obj.userType === "Buyer"){
-            }else if( obj.userType === "Seller"){
-              for(let i = 1; i < result.storeData.length; i++){
-                if( result.storeData[i].storeAddress == coinbase ){
-                  result.myStoreID = result.storeData[i].id;
+            if(result){  
+              //what's my userid
+              for(let i = 1; i < result.payload.userData.length; i++){
+                if( result.payload.userData[i].address == coinbase ){
+                  obj.myID = result.payload.userData[i].id;
+                  result.payload.myID = result.payload.userData[i].id;
                   break;
                 }
               }
-            }else if( obj.userType === "Arbiter"){
-            }else if( obj.userType === "Owner"){
+
+              // now get some role specific data
+              if( obj.userType === "Buyer"){
+              }else if( obj.userType === "Seller"){
+                for(let i = 1; i < result.payload.storeData.length; i++){
+                  if( result.payload.storeData[i].storeAddress == coinbase ){
+                    result.payload.myStoreID = result.payload.storeData[i].id;
+                    break;
+                  }
+                }
+              }else if( obj.userType === "Arbiter"){
+              }else if( obj.userType === "Owner"){
+              }
+
+              dispatch(userLoggedIn(obj));
+              dispatch(result);
             }
 
-            if(result)  dispatch(result);
 
             // Used a manual redirect here as opposed to a wrapper.
             // This way, once logged in a user can still access the home page.

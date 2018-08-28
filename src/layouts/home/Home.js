@@ -4,12 +4,13 @@ import Product from 'components/common/Product'
 class AboutContractAndWebsite extends Component {
   render() {
     return(
-      <Container textAlign='center'>
-        <Header as='h2'>About Smart-Contract and Website</Header>
-        <p>
-          About Smart Contract and website
-        </p>
-      </Container>
+      <h2>Home</h2>
+      // <Container textAlign='center'>
+      //   <Header as='h2'>About Smart-Contract and Website</Header>
+      //   <p>
+      //     About Smart Contract and website
+      //   </p>
+      // </Container>
     )
   }
 }

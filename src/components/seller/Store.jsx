@@ -114,7 +114,7 @@ class Store extends Component {
       name: this.state.name,
       email: this.state.email,
       storePicture: this.state.storePicture,
-      admin: this.state.selectedman
+      arbiter: "0xfc1481aced0cc457c33fb5a60896ef91b59a43e9"
     };
     this.props.action.CreateStore(data)
   }

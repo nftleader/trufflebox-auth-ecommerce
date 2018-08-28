@@ -201,9 +201,11 @@
         }
     ],
     "myStoreID" : 0,
+    "myID": 1,
     "escrowData" : [
         {},
         {
+            "id": 1,
             "product_id": 3,
             "buyer_id": 1,
             "seller_id": 4,
@@ -214,8 +216,9 @@
             "fundsDisbursed": false
         },
         {
+            "id": 2,
             "product_id": 5,
-            "buyer_id": 2,
+            "buyer_id": 1,
             "seller_id": 5,
             "arbiter_id": 8,
             "amount": "2.3 ETH",
@@ -224,6 +227,7 @@
             "fundsDisbursed": false
         },
         {
+            "id": 3,
             "product_id": 6,
             "buyer_id": 2,
             "seller_id": 5,

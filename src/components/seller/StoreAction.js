@@ -19,8 +19,6 @@ export function CreateStore(data) {
     if (typeof web3 !== 'undefined') {
 
         return function(dispatch) {
-            dispatch(storecreate(data));
-            return;
           // Using truffle-contract we create the authentication object.
           const authentication = contract(AuthenticationContract)
           authentication.setProvider(web3.currentProvider)
@@ -38,8 +36,7 @@ export function CreateStore(data) {
             authentication.deployed().then(function(instance) {
               authenticationInstance = instance
     
-              let chosenadmin = "0x0";
-              authenticationInstance.createStore(data.name, data.email, data.storePicture, data.admin, {from: coinbase})
+              authenticationInstance.createStore(data.name, data.email, data.storePicture, data.arbiter, {from: coinbase})
               .then(function(result) {
                 dispatch(storecreate(data));
               })
