@@ -15,7 +15,7 @@ const CommonReducer = (state = initialState, action) => {
         return {...state, ...mem}
     }
 
-    if(action.type === 'CREATE_PRODUCT') {
+    if(action.type === 'CREATE_PRODUCT') {  //???
         console.log('track_11')
         console.log(state)
         console.log(action)
@@ -27,12 +27,12 @@ const CommonReducer = (state = initialState, action) => {
     }
 
     if (action.type === 'COMMON_DATA'){
-        console.log('track_1');
-        console.log(action);
+        //console.log('track_1');
+        //console.log(action);
         //When back-end is ready it will be removed
-        action.payload.productData = state.data.productData
-        // return { ...state, ...{data:action.payload}}  
-        return {...state}
+        //action.payload.productData = state.data.productData
+        return { ...state, ...{data:action.payload}}  
+        //return {...state}
     }
     
     if (action.type === 'CHANGE_USER_STATE') {
@@ -61,10 +61,27 @@ const CommonReducer = (state = initialState, action) => {
 
     if(action.type === 'ESCROW_RELEASE'){
         let newstate = {...state};
-        newstate.data.escrowData[action.data.id].release_count ++;
-        if(newstate.data.escrowData[action.data.id].release_count == 2){
+        
+        if(newstate.data.escrowData[action.data.id].releaseCount < 2)
+            newstate.data.escrowData[action.data.id].releaseCount++;
+        if(newstate.data.escrowData[action.data.id].releaseCount == 2)
             newstate.data.escrowData[action.data.id].fundsDisbursed = true;
-        }
+        return newstate;
+    }
+
+    if(action.type === 'ESCROW_REFUND'){
+        let newstate = {...state};
+        
+        if(newstate.data.escrowData[action.data.id].refundCount < 2)
+            newstate.data.escrowData[action.data.id].refundCount++;
+        if(newstate.data.escrowData[action.data.id].refundCount == 2)
+            newstate.data.escrowData[action.data.id].fundsDisbursed = true;
+        return newstate;
+    }
+
+    if(action.type === 'ESCROW_WITHDRAW'){
+        let newstate = {...state};
+        newstate.data.escrowData[action.data.id].amount = 0;
         return newstate;
     }
 

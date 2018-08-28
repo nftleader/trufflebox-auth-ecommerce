@@ -16,7 +16,7 @@ class OrderDetailedModal extends React.Component {
                         <Modal.Description>
                             <Header>Order details</Header>
                             <p as='h5'>Product Name: {this.props.info.order.name}</p>
-                            <p as='h5'>Price: {this.props.info.order.price}</p>
+                            <p as='h5'>Price: {this.props.info.order.price} ETH</p>
                             <p as='h5'>Seller: {this.props.info.order.seller}</p>
 
                             <p as='h5'>Arbiter: {this.props.info.escrow.arbiter}</p>

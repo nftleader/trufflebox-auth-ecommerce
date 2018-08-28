@@ -1,25 +1,26 @@
 {
     "userData" : [
         {},
+        {},
         {
             "id": 1,
-            "address" : "0x first arbiter",
-            "name": "first arbiter ",
-            "email": "first@arbiter.com",
+            "address" : "0x first buyer",
+            "name": "first buyer ",
+            "email": "first@buyer.com",
             "phoneNumber": "11111111111",
             "profilePicture": "ffffff",
-            "userType": "Arbiter",
+            "userType": "Buyer",
             "userState": "Approved",
             "exists": true
         },
         {
             "id": 2,
-            "address" : "0x second arbiter",
-            "name": "second arbiter ",
-            "email": "second@arbiter.com",
+            "address" : "0x second buyer",
+            "name": "second buyer ",
+            "email": "second@buyer.com",
             "phoneNumber": "2222222",
             "profilePicture": "ssssssssssssss",
-            "userType": "Arbiter",
+            "userType": "Buyer",
             "userState": "Approved",
             "exists": true
         },
@@ -74,7 +75,7 @@
             "email": "first@arbiter.com",
             "phoneNumber": "111111111111111111",
             "profilePicture": "ffffffffff",
-            "userType": "Seller",
+            "userType": "Arbiter",
             "userState": "Approved",
             "exists": true
         },
@@ -85,7 +86,7 @@
             "email": "second@arbiter.com",
             "phoneNumber": "22222222",
             "profilePicture": "ffffffffff",
-            "userType": "Seller",
+            "userType": "Arbiter",
             "userState": "Approved",
             "exists": true
         }

@@ -19,7 +19,7 @@ class PItem extends Component {
                                         <Item.Header><ItemModal product={payload}/></Item.Header>
                                         <Item.Description>
                                             <p as='h5'>Name: {payload.name}</p>
-                                            <p as='h5'>Price: {payload.price}</p>
+                                            <p as='h5'>Price: {payload.price} ETH</p>
                                             <p as='h5'>descLink: {payload.descLink}</p>
                                         </Item.Description>
                                     </Item.Content>

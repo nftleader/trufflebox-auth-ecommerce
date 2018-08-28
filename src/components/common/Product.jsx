@@ -23,7 +23,8 @@ class Product extends Component {
   componentDidMount() {
     console.log('track_componentDidMount')
     this.props.store.common.data.productData.forEach((item, index) => {
-      console.log(['asdfasd',item])
+      //console.log(['asdfasd',item])
+      if(index == 0)  return false;
       const cat = item.category
       if(cat === undefined){}
       else if(this.state.categories.indexOf(cat) > -1) {}
@@ -34,6 +35,7 @@ class Product extends Component {
     this.setState({activeItem: this.state.categories[0]})
     
     this.setState({products: this.props.store.common.data.productData.filter((item, index) =>{
+      if(index == 0)  return false;
       if(item.category === this.state.categories[0]) return true;
       else return false
     })})
@@ -42,6 +44,7 @@ class Product extends Component {
   handleItemClick = (e, { name }) => {
     this.setState({ activeItem: name })
     this.setState({products: this.props.store.common.data.productData.filter((item, index) =>{
+      if(index == 0)  return false;
       if(item.category === name ) return true;
       else return false
     })})

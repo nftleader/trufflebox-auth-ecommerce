@@ -227,13 +227,15 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 		{
 			let productCount = (await ecommerce.productCount.call()).toNumber();
 			let [_id, _name, _category, _startTime, _price, _buyer, _condition, _productState] = await ecommerce.getProduct.call(productCount, {from: seller});
+			let _seller = await ecommerce.storesByProductId.call(productCount)
 			let productobj = {
 				_id: _id.toNumber(),
 				_name: web3.toUtf8(_name),
 				_category: web3.toUtf8(_category),
 				_startTime: _startTime.toNumber(),
 				_price: _price.toNumber(),
-				_buyer: web3.toUtf8(_buyer),
+				_seller: _seller,
+				_buyer: _buyer,
 				_condition: _condition.toNumber(),
 				_productState: _productState.toNumber(),
 			}

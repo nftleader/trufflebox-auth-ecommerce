@@ -16,7 +16,7 @@ const routingMiddleware = routerMiddleware(browserHistory)
 
 const store = createStore(
   reducer,
-  {common:{data:Initial}},
+  //{common:{data:Initial}},
   composeEnhancers(
     applyMiddleware(
 //    logger,

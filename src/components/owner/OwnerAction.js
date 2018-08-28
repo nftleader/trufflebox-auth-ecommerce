@@ -51,7 +51,7 @@ export function changeUserState(status, userid) {
                         alert("check your metamask!");
                         console.log(err);
                     })
-                });          
+                });
             });
         }; 
     }else {

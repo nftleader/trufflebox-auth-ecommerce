@@ -50,16 +50,16 @@ contract Escrow  {
     
     function escrowDetails() public view returns (address, address, address, uint, bool, uint, uint) {
         return (buyer, seller, arbiter, this.balance, fundsDisbursed, releaseCount, refundCount);
-        
     }
     
     function releaseAmountToSeller(address _caller) public {
         require(fundsDisbursed == false);
         require(msg.sender == owner);
-        if ((_caller == buyer || _caller == seller || _caller == arbiter) && releaseAmount[_caller] != true) {
-            releaseAmount[_caller] = true;
-            releaseCount = releaseCount.add(1);
-        }
+        require(_caller == buyer || _caller == seller || _caller == arbiter);
+        require(releaseAmount[_caller] != true);
+
+        releaseAmount[_caller] = true;
+        releaseCount = releaseCount.add(1);
         
         // two parties have participated of the process, so the money can be released
         if (releaseCount == 2) {
@@ -75,11 +75,12 @@ contract Escrow  {
     function refundAmountToBuyer(address _caller) public {
         require(fundsDisbursed == false);
         require(msg.sender == owner);
-        if ((_caller == buyer || _caller == seller || _caller == arbiter) && releaseAmount[_caller] != true) {
-            refundAmount[_caller] = true;
-            refundCount = refundCount.add(1);
-        }
-        
+        require(_caller == buyer || _caller == seller || _caller == arbiter);
+        require(refundAmount[_caller] != true);
+
+        refundAmount[_caller] = true;
+        refundCount = refundCount.add(1);
+
         // two parties have participated of the process, so the money can be released
         if (refundCount == 2) {
             pendingWithdraws[buyer] = pendingWithdraws[buyer].add(amount);

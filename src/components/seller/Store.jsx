@@ -62,7 +62,9 @@ class Store extends Component {
       })
       var current_product = []
       this.props.common.data.productData.forEach((item, index) => {
-            if(item.store_id === this.props.common.data.myStoreID) {
+            //if(item.store_id === this.props.common.data.myStoreID) 
+            if(item.seller === this.props.user.data.myAddress) 
+            {
                 current_product.push(item)
             }
       })
@@ -132,15 +134,28 @@ class Store extends Component {
 
   handleSubmitProduct(event) {
         event.preventDefault()
+        var _state = this.state.product.ratioselected.state;
+        var s = 0;
+        if(_state === "ForSale")            s = 0;
+        else if(_state === "Sold")       s = 1;
+        else if(_state === "Shipped")       s = 2;
+        else if(_state === "Received")       s = 3;
+        else if(_state === "Deleted")       s = 4;
+
+        var _condition = this.state.product.ratioselected.condition;
+        var c = 0;
+        if(_state === "New")            c = 0;
+        else if(_state === "Used")       c = 1;
+
         let data = {
             category: this.state.product.category,
             descLink: this.state.product.descLink,
             imageLink: this.state.product.imageLink,
             name: this.state.product.name,
             price: this.state.product.price,
-            productCondition: this.state.product.ratioselected.condition,
-            productState: this.state.product.ratioselected.state,
-            startTime: this.state.product.startTime,
+            productCondition: c,
+            productState: s,
+            startTime: parseInt(this.state.product.startTime, 10),
         }
         let mem = this.state.currentproduct
         mem.push(data);
@@ -309,7 +324,6 @@ class Store extends Component {
                                     <Header as='h5'>Email:{this.props.common.data.storeData[this.props.common.data.myStoreID].email}</Header>
                                     <Header as='h5'>Picture:{this.props.common.data.storeData[this.props.common.data.myStoreID].storeFrontImage}</Header>
                                     <Header as='h5'>Arbiter:{this.props.common.data.storeData[this.props.common.data.myStoreID].arbiter}</Header>
-                                    <Button onClick={() => this.onClickWithdraw()}>WithDraw</Button>
                                 </Segment>
                             </Grid.Column>
                             <Grid.Column  width="3">
@@ -332,14 +346,22 @@ class Store extends Component {
                                 <Header as='h3'>Product List</Header>
                                 <Segment className='storeseg' style={styleproductlist}>
                                     <List divided selection>
-                                        {this.state.currentproduct.map((key, index) => {
+                                        {
+                                            
+                                        //     this.props.common.data.productData.forEach((item, index) => {
+                                        //         if(item.store_id === this.props.common.data.myStoreID) {
+                                        //             current_product.push(item)
+                                        //         }
+                                        //   })
+                                          
+                                          this.state.currentproduct.map((key, index) => {
                                             return(
                                                 <List.Item active key={index}>
                                                     <List.Content>
                                                         Name:{key.name}
                                                     </List.Content>
                                                     <List.Content>
-                                                        Price:{key.price}
+                                                        Price:{key.price} ETH
                                                     </List.Content>
                                                 </List.Item>
                                             )

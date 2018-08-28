@@ -71,7 +71,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     function login() 
         external
         view
-        // onlyExistingUser(msg.sender)
+        onlyExistingUser(msg.sender)
         returns (bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
     {
         if (users[msg.sender].exists) {
@@ -259,7 +259,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
 
     /** @dev user effectivelly request withdraw
      */
-    function withdraw() 
+    function withdraw()  
         external 
         payable 
         onlyOwner

@@ -21,10 +21,10 @@ class Dashboard extends Component {
     this.setState({
       contactInfo: {
         address:  this.props.dashboard.data.contractData.address,
-        balance:  this.props.dashboard.data.balance,
+        balance:  this.props.dashboard.data.contractData.balance,
         arbiters:   this.props.dashboard.data.arbiterCount,
         sellers: this.props.dashboard.data.sellerCount,
-        stores: 0,
+        stores: this.props.dashboard.data.storeData.length,
       }
     });
     this.setState({
@@ -104,7 +104,6 @@ class Dashboard extends Component {
               {Object.keys(this.state.contactInfo).map((key, index) => 
                 <Grid.Column width={this.state.col[index]} key={key}>
                   <p as='h5' >{key}: {this.state.contactInfo[key]+' '}
-                    {key === 'balance' ?<Button size='tiny' onClick={() => this.onClickWithdrawButton()}>withdraw</Button>:''}
                   </p>
                 </Grid.Column>)}
             </Grid>
@@ -134,7 +133,8 @@ class Dashboard extends Component {
 
               <Table.Body>
               {this.state.datas.map((item, index) => {
-                return ( <Table.Row key={item.email}>
+                if(index == 0)  return false;
+                return ( <Table.Row key={index}>
                           <Table.Cell>{index + 1}</Table.Cell>
                           <Table.Cell>{item.name}</Table.Cell>
                           <Table.Cell>{item.email}</Table.Cell>

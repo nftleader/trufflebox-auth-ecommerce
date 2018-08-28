@@ -42,17 +42,17 @@ class Orders extends Component {
                   <Table.HeaderCell>Release count</Table.HeaderCell>
                   <Table.HeaderCell>Refund count</Table.HeaderCell>
                   <Table.HeaderCell>Funds disbursed</Table.HeaderCell>
-                  <Table.HeaderCell>Escrow state</Table.HeaderCell>
+                  <Table.HeaderCell>Escrow Actions</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
 
               <Table.Body>
               {this.props.common.escrowData.map((item, index) => {
                 if( index > 0
-                  && ((this.props.store.user.userType === "Buyer" && item.buyer_id == this.props.common.myID)
-                      || (this.props.store.user.userType === "Seller" && item.seller_id == this.props.common.myID)
-                      || (this.props.store.user.userType === "Arbiter" && item.arbiter_id == this.props.common.myID))
-                  && (item.fundsDisbursed == false))
+                  && ((this.props.store.user.data.userType === "Buyer" && item.buyer_id == this.props.common.myID)
+                      || (this.props.store.user.data.userType === "Seller" && item.seller_id == this.props.common.myID)
+                      || (this.props.store.user.data.userType === "Arbiter" && item.arbiter_id == this.props.common.myID))
+                  /*&& (item.fundsDisbursed == false)*/)
                 //if(item.buyer_id == this.props.common.myID /*&& item.fundsDisbursed == false */)
                   //return ( <Table.Row key={item.id}>
                   return ( <Table.Row key={index}>
@@ -66,12 +66,17 @@ class Orders extends Component {
                             <Table.Cell>{this.props.common.userData[item.arbiter_id].name}</Table.Cell>
                             <Table.Cell>{this.props.common.userData[item.seller_id].name}</Table.Cell>
                             <Table.Cell>{item.amount}</Table.Cell>
-                            <Table.Cell>{item.refund_count}</Table.Cell>
-                            <Table.Cell>{item.release_count}</Table.Cell>
+                            <Table.Cell>{item.releaseCount}</Table.Cell>
+                            <Table.Cell>{item.refundCount}</Table.Cell>
                             <Table.Cell>{item.fundsDisbursed? "Yes" : "No"}</Table.Cell>
                             <Table.Cell>
-                              <Button onClick={() => this.props.onClickRelease(item)}>Release</Button>
-                              <Button onClick={() => this.props.onClickRefund(item)}>Refund</Button>
+                              {!item.fundsDisbursed && <Button positive onClick={() => this.props.onClickRelease(item)}>Release</Button>}
+                              {!item.fundsDisbursed && <Button color='orange' onClick={() => this.props.onClickRefund(item)}>Refund</Button>}
+                              {(item.fundsDisbursed &&
+                                item.amount > 0 &&
+                                ((item.refundCount == 2 && this.props.store.user.data.userType === "Buyer") ||
+                                (item.releaseCount == 2 && this.props.store.user.data.userType === "Seller"))) &&
+                                <Button positive onClick={() => this.props.onClickWithdraw(item)}>Withdraw</Button>}
                             </Table.Cell>
                           </Table.Row> )})
               }
@@ -86,8 +91,8 @@ class Orders extends Component {
 
 const mapStateToProps = state => ({
   store: state,
-  //common: state.common.data
-  common: Initial
+  common: state.common.data
+  //common: Initial
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -99,6 +104,14 @@ const mapDispatchToProps = dispatch => ({
   onClickRelease (item){
     console.log("release: ", item);
     dispatch(CommonAction.releaseEscrow(item));
+  },
+  onClickRefund (item){
+    console.log("refund: ", item);
+    dispatch(CommonAction.refundEscrow(item));
+  },
+  onClickWithdraw (item){
+    console.log("withdraw: ", item);
+    dispatch(CommonAction.withdrawEscrow(item));
   }
 })
 

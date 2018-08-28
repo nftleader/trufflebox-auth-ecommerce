@@ -17,7 +17,7 @@ function userLoggedIn(user) {
 
 
 function findUserIDByAddress(userData, /*role, */ userAddress){
-  for(let i = 1; i <= userData.length; i++){
+  for(let i = 1; i < userData.length; i++){
     if( /*userData[i].userType == role && */ userData[i].address == userAddress){
       return i;
     }
@@ -31,6 +31,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
     payload:{
       contractData:{
         address: "0x0",
+        balance: 0,
         abi: ""
       },
       balance: 0,
@@ -38,8 +39,9 @@ let getCommonData = async function(authenticationInstance, coinbase){
       arbiterCount: 0,
       sellerCount: 0, 
 
-      myStoreID: -1,
+      myStoreID: 0,
       myID: 1,
+      myAddress: "0x0",
 
       userData:[{}],    //to iterate from ONE
       productData:[{}],
@@ -54,6 +56,13 @@ let getCommonData = async function(authenticationInstance, coinbase){
   //contract info
   CommonObj.payload.contractData.address = authenticationInstance.address;
   CommonObj.payload.contractData.abi = authenticationInstance.abi;
+  //contract balance
+  await web3.eth.getBalance(CommonObj.payload.contractData.address, (err, res) => {
+    if (err) { Promise.reject(err) }
+    CommonObj.payload.contractData.balance = web3.fromWei(res.toString(10), "ether");
+    Promise.resolve(res);
+  });
+
   //admin balance
   await web3.eth.getBalance(coinbase, (err, res) => {
     if (err) { Promise.reject(err) }
@@ -126,6 +135,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
     try{
       let [id, name, category, startTime, price, buyer, productCondition, productState] = await ecommerce.getProduct.call(i);
       let [imageLink, descLink] = await ecommerce.getProductDetails(i);
+      let seller = await ecommerce.storesByProductId.call(id);
 
       let obj = {
         id: id.toNumber(),
@@ -134,10 +144,11 @@ let getCommonData = async function(authenticationInstance, coinbase){
         imageLink: web3.toUtf8(imageLink),
         descLink: web3.toUtf8(descLink),
         startTime: startTime.toNumber(),
-        price: price.toNumber(),
-        buyer: web3.toUtf8(buyer),
+        price: web3.fromWei(price, 'ether').toNumber(),
+        seller: seller,
+        buyer: buyer,
         productCondition: PRODUCT_CONDITION[productCondition.toNumber()],
-        productState: PRODUCT_STATE[productState],
+        productState: PRODUCT_STATE[productState.toNumber()],
       };
 
       console.log("***********  product obj: ", obj);
@@ -159,10 +170,10 @@ let getCommonData = async function(authenticationInstance, coinbase){
       let [ storeAddress, name, email, arbiter, storeFrontImage, balance, productCount] = await ecommerce.storesById.call(i);
       let obj = {
         id: i,
-        storeAddress: web3.toUtf8(storeAddress),
+        storeAddress: storeAddress,
         name: web3.toUtf8(name),
         email: web3.toUtf8(email),
-        arbiter: web3.toUtf8(arbiter),
+        arbiter: arbiter,
         storeFrontImage: web3.toUtf8(storeFrontImage),
         balance: web3.fromWei(balance.toString(10), "ether"),
         productCount: productCount.toNumber()
@@ -170,18 +181,20 @@ let getCommonData = async function(authenticationInstance, coinbase){
       console.log("***********  store obj: ", obj);
       CommonObj.payload.storeData.push(obj);
     }catch(err){
-      console.log("missing product id ", i);
+      console.log("missing store id ", i);
       console.log("error ", err);
       continue;
     }
   }
 
+  console.log("$$$$$$$$$$  escrow data");
 
   for(let i = 1; i <= productCount; i++){
     try{
       let product = CommonObj.payload.productData[i];
-      if(product && PRODUCT_CONDITION[product.productCondition] != "ForSale" && PRODUCT_CONDITION[product.productCondition] != "Deleted" ){
-        let [buyer, seller, arbiter, amount, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(product.id);
+      console.log(product);
+      if(product && product.productState != "ForSale" && product.productState != "Deleted" ){
+        let [buyer, seller, arbiter, amount, fundsDisbursed, releaseCount, refundCount] = await ecommerce.escrowDetails(product.id);
         let escrowobj = {
           id: CommonObj.payload.escrowData.length,
           product_id: product.id,
@@ -191,12 +204,12 @@ let getCommonData = async function(authenticationInstance, coinbase){
           seller_id: -1,
           arbiter: arbiter,
           arbiter_id: -1,
-          amount: amount.toNumber(),
+          amount: web3.fromWei(amount, "ether").toNumber(),
           fundsDisbursed: fundsDisbursed,
           releaseCount: releaseCount.toNumber(),
           refundCount: refundCount.toNumber()          
         };
-        console.log("***********  store obj: ", escrowobj);
+        console.log("***********  escrowobj: ", escrowobj);
         CommonObj.payload.escrowData.push(escrowobj);
       }
     }catch(err){
@@ -252,6 +265,7 @@ export function loginUser() {
             let userStatus = ["Pending", "Approved"];
             obj = {
               myID: 1, // zero?
+              myAddress: coinbase,
               name: web3.toUtf8(name),
               email: web3.toUtf8(email),
               phoneNumber: web3.toUtf8(phoneNumber),
@@ -269,6 +283,7 @@ export function loginUser() {
                 if( result.payload.userData[i].address == coinbase ){
                   obj.myID = result.payload.userData[i].id;
                   result.payload.myID = result.payload.userData[i].id;
+                  result.payload.myAddress = coinbase;
                   break;
                 }
               }
@@ -295,10 +310,10 @@ export function loginUser() {
             // This way, once logged in a user can still access the home page.
             var currentLocation = browserHistory.getCurrentLocation()
 
-            if ('redirect' in currentLocation.query)
-            {
-              return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
-            }
+            // if ('redirect' in currentLocation.query)
+            // {
+            //   return browserHistory.push(decodeURIComponent(currentLocation.query.redirect))
+            // }
             return browserHistory.push('/profile')
 
 /*            if( obj.userType === "Buyer"){

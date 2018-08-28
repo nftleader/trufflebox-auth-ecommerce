@@ -51,7 +51,7 @@ class ItemModal extends React.Component {
                 <Image wrapped size='medium' src={ItemImage} />
                 <Modal.Description>
                     <p as='h5'>Name: {this.props.product.name}</p>
-                    <p as='h5'>Price: {this.props.product.price}</p>
+                    <p as='h5'>Price: {this.props.product.price} ETH</p>
                     <p as='h5'>DescLink: {this.props.product.descLink}</p>
                     <p as='h5'>ProductCondition: {this.props.product.productCondition}</p>
                     <p as='h5'>ProductState: {this.props.product.productState}</p>
