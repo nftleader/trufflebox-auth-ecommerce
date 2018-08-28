@@ -32,6 +32,7 @@ class Product extends Component {
       }
     })
     this.setState({activeItem: this.state.categories[0]})
+    
     this.setState({products: this.props.store.common.data.productData.filter((item, index) =>{
       if(item.category === this.state.categories[0]) return true;
       else return false
@@ -41,7 +42,7 @@ class Product extends Component {
   handleItemClick = (e, { name }) => {
     this.setState({ activeItem: name })
     this.setState({products: this.props.store.common.data.productData.filter((item, index) =>{
-      if(item.category === name) return true;
+      if(item.category === name ) return true;
       else return false
     })})
   }

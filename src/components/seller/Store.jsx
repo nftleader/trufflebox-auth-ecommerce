@@ -30,6 +30,8 @@ class Store extends Component {
       selectedman:'',
     }
 
+    this.state.currentproduct = []
+
     this.state.product = {
         name: '',
         category: '',
@@ -45,37 +47,37 @@ class Store extends Component {
         productState: ['ForSale', 'Sold', 'Shipped', 'Received', 'Deleted'],
     }
 
-    this.state.datas = [{
-        name: 'aaa',
-        email: 'email1.e.com'
-      }, {
-        name: '21433214',
-        email: 'email2.e.com'
-      },{
-        name: '21433214',
-        email: 'email2.e.com'
-      },{
-        name: '21433214',
-        email: 'email2.e.com'
-      },
-      {
-        name: '21433214',
-        email: 'email2.e.com'
-      }, {
-        name: '334354654',
-        email: 'email3.e.com'
-    }];
+    this.state.datas = []
+  }
+
+  componentDidMount() {
+      var user = []
+      this.props.common.data.userData.forEach((item, index) => {
+        if(item.userType==="Arbiter"){
+            user.push(item)
+          }
+      })
+      this.setState({
+          datas:user
+      })
+      var current_product = []
+      this.props.common.data.productData.forEach((item, index) => {
+            if(item.store_id === this.props.common.data.myStoreID) {
+                current_product.push(item)
+            }
+      })
+      this.setState({
+        currentproduct: current_product
+      })
   }
 
   onInputChange(event) {
-    console.log(event.target.id);
     let newState={};
     newState[event.target.id] = event.target.value;
     this.setState(newState)
   }
 
   onproductInputChange(event){
-      console.log('track_product');
       const id = event.target.id;
       const value = event.target.value;
       let mem = this.state.product;
@@ -87,12 +89,11 @@ class Store extends Component {
 
   onSelectChange(item, index) {
     this.setState({
-        selectedman:index
+        selectedman:item.address
     })
   }
 
   onRoleChange(event) {
-    console.log(event.target.value);
     this.setState({
       userType: event.target.value
     });
@@ -110,17 +111,42 @@ class Store extends Component {
         return alert('Please select admin')
     }
 
+    // "id" : 1,
+    // "storeAddress": "0xaaaaaaaaaaaaaaa",
+    //// "name": "first store",
+    //// "email": "fist@store.com",
+    //// "arbiter": "0xbbbbbbbbbbb",
+    //// "storeFrontImage": "storeFrontImage",
+    // "balance": 5432.73,
+    // "productCount": 2
+
     let data = {
-      name: this.state.name,
-      email: this.state.email,
-      storePicture: this.state.storePicture,
-      arbiter: "0xfc1481aced0cc457c33fb5a60896ef91b59a43e9"
+        id: this.props.common.data.storeData.length,
+        name: this.state.name,
+        email: this.state.email,
+        storeFrontImage: this.state.storePicture,
+        arbiter  : this.state.selectedman
     };
     this.props.action.CreateStore(data)
   }
+
   handleSubmitProduct(event) {
         event.preventDefault()
-        let data = this.state.product
+        let data = {
+            category: this.state.product.category,
+            descLink: this.state.product.descLink,
+            imageLink: this.state.product.imageLink,
+            name: this.state.product.name,
+            price: this.state.product.price,
+            productCondition: this.state.product.ratioselected.condition,
+            productState: this.state.product.ratioselected.state,
+            startTime: this.state.product.startTime,
+        }
+        let mem = this.state.currentproduct
+        mem.push(data);
+        this.setState({
+            currentproduct: mem
+        })
         this.props.action.CreateProduct(data)
   }
 
@@ -129,7 +155,7 @@ class Store extends Component {
   }
 
   listrender(item, index){
-    if(index === this.state.selectedman) {
+    if(item.address === this.state.selectedman) {
         return (
             <List.Item active key={index} value='index' onClick={() => this.onSelectChange(item,index)}>
                 <List.Content>
@@ -221,10 +247,8 @@ class Store extends Component {
   }
 
   render() {
-      console.log('track_10');
-      console.log(this.props.store.product);
       const pro = this.props.store.product
-      if(this.props.store.data.name === undefined){
+      if(this.props.common.data.myStoreID === 0){
         return(
         <main className="container" >
             <div className="row">
@@ -270,23 +294,21 @@ class Store extends Component {
         </main>
         )
     }
-    else {
-        console.log('here'); 
+    else { 
         return(
             <main className="container" >
                 <div className="row">
                     <div className="col-md-12 storestore">
                         <Grid>
                             <Grid.Column  width="3">
-
                             </Grid.Column>
                             <Grid.Column  width="3">
                                 <Header as='h3'>Store Dashboard</Header>
                                 <Segment className='storeseg' style={style}>
-                                    <Header as='h5'>Name:{this.props.store.data.name}</Header>
-                                    <Header as='h5'>Email:{this.props.store.data.email}</Header>
-                                    <Header as='h5'>Picture:{this.props.store.data.storePicture}</Header>
-                                    <Header as='h5'>Admin:{this.props.store.data.admin}</Header>
+                                    <Header as='h5'>Name:{this.props.common.data.storeData[this.props.common.data.myStoreID].name}</Header>
+                                    <Header as='h5'>Email:{this.props.common.data.storeData[this.props.common.data.myStoreID].email}</Header>
+                                    <Header as='h5'>Picture:{this.props.common.data.storeData[this.props.common.data.myStoreID].storeFrontImage}</Header>
+                                    <Header as='h5'>Arbiter:{this.props.common.data.storeData[this.props.common.data.myStoreID].arbiter}</Header>
                                     <Button onClick={() => this.onClickWithdraw()}>WithDraw</Button>
                                 </Segment>
                             </Grid.Column>
@@ -296,13 +318,12 @@ class Store extends Component {
                                     <form className="pure-form pure-form-stacked" onSubmit={this.handleSubmitProduct.bind(this)}>
                                         <fieldset>
                                             {Object.keys(this.state.product).map((key, index) => {
-                                                console.log(key);
                                                 return(
                                                     this.productrender(key)
                                                 )
                                             })}
                                             <br/>
-                                            <button type="submit" className="pure-button pure-button-primary">Create Store</button>
+                                            <button type="submit" className="pure-button pure-button-primary">Create Product</button>
                                         </fieldset>
                                     </form>
                                 </Segment>
@@ -310,11 +331,16 @@ class Store extends Component {
                             <Grid.Column  width="3" className="storelist">
                                 <Header as='h3'>Product List</Header>
                                 <Segment className='storeseg' style={styleproductlist}>
-                                    <List>
-                                        {pro.map((key, index) => {
+                                    <List divided selection>
+                                        {this.state.currentproduct.map((key, index) => {
                                             return(
-                                                <List.Item key={index}>
-                                                    {key.name}
+                                                <List.Item active key={index}>
+                                                    <List.Content>
+                                                        Name:{key.name}
+                                                    </List.Content>
+                                                    <List.Content>
+                                                        Price:{key.price}
+                                                    </List.Content>
                                                 </List.Item>
                                             )
                                         })}
@@ -333,7 +359,9 @@ class Store extends Component {
 }
 
 const mapStateToProps = state => ({
-    store: state.store
+    store: state.store,
+    common: state.common,
+    user:state.user
 })
   
 const mapDispatchToProps = dispatch => ({

@@ -13,7 +13,7 @@ class PItem extends Component {
                     {
                         this.props.products.map((payload, index) => {
                             return(
-                                <Item>
+                                <Item key={index}>
                                     <Item.Image size='small' src={ItemImage} />
                                     <Item.Content>
                                         <Item.Header><ItemModal product={payload}/></Item.Header>
