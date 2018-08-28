@@ -14,6 +14,10 @@ export const productcreate = (data) => ({
 })
 
 export function CreateStore(data) {
+
+    return function(dispatch) {
+        dispatch(storecreate(data))
+    }
     let web3 = store.getState().web3.web3Instance
     
     if (typeof web3 !== 'undefined') {

@@ -9,12 +9,13 @@ class ItemModal extends React.Component {
   }
 
   renderButton() {
-    if(this.props.store.user.data.userType === ''){
-      alert('here')
-      return (
-        <Button positive labelPosition='right' content='Cancel'/>
-      )
-    }
+    // if(this.props.store.user.data.userType === ''){
+    //   // alert('here')
+    //   return (
+    //     <Button positive labelPosition='right' content='Cancel'/>
+    //   )
+    // }
+    return <Button onClick={this.close} positive content="Buy"></Button> 
     // <Button onClick={this.close} positive content="Release"></Button>
     // <Button onClick={this.close} negative content="Redund"></Button>
     // <Button positive icon='checkmark' labelPosition='right' content='BUY' />
