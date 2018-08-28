@@ -1,6 +1,6 @@
 import AuthenticationContract from '../../../../build/contracts/Authentication.json'
 import EcommerceContract from '../../../../build/contracts/Ecommerce.json'
-
+import {PRODUCT_CONDITION, PRODUCT_STATE, USER_TYPES, USER_STATUS} from "../../../util/globals.js"
 import { browserHistory } from 'react-router'
 import store from '../../../store'
 
@@ -16,11 +16,14 @@ function userLoggedIn(user) {
 }
 
 
-const PRODUCT_CONDITION = ["New", "Used"];
-const PRODUCT_STATE     = ["ForSale", "Sold", "Shipped", "Received", "Deleted"];
-const USER_TYPES        = ["Buyer", "Seller", "Arbiter", "Owner"];
-const USER_STATUS       = ["Pending", "Approved"];
-
+function findUserIDByAddress(userData, /*role, */ userAddress){
+  for(let i = 1; i <= userData.length; i++){
+    if( /*userData[i].userType == role && */ userData[i].address == userAddress){
+      return i;
+    }
+  }
+  return -1;
+}
 
 let getCommonData = async function(authenticationInstance, coinbase){
   let CommonObj = {
@@ -33,13 +36,15 @@ let getCommonData = async function(authenticationInstance, coinbase){
       balance: 0,
       userCount: 0,
       arbiterCount: 0,
-      sellerCount: 0,
+      sellerCount: 0, 
 
-      userData:[],
-      productData:[],
-      storeData:[],
-      orderData:[],
-      escrowData:[]
+      myStoreID: -1,
+
+      userData:[{}],    //to iterate from ONE
+      productData:[{}],
+      storeData:[{}],
+      orderData:[{}],
+      escrowData:[{}]
     }
   };
 
@@ -67,7 +72,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
     try{
       const [ address, name, email, phoneNumber, profilePicture, userType, userState ] = await authenticationInstance.getUser(i);
       let obj = {
-        id : i,
+        id: i,
         address: address,
         name: web3.toUtf8(name),
         email: web3.toUtf8(email),
@@ -118,12 +123,11 @@ let getCommonData = async function(authenticationInstance, coinbase){
 
   for(let i = 1; i <= productCount; i++){
     try{
-      let [ id, name, category, startTime, price, buyer, productCondition, productState] = await ecommerce.getProduct(i);
-      let [ imageLink, descLink] = await ecommerce.getProductDetails(i);
-
+      let [id, name, category, startTime, price, buyer, productCondition, productState] = await ecommerce.getProduct.call(i);
+      let [imageLink, descLink] = await ecommerce.getProductDetails(i);
 
       let obj = {
-        id: i,
+        id: id.toNumber(),
         name: web3.toUtf8(name),
         category: web3.toUtf8(category),
         imageLink: web3.toUtf8(imageLink),
@@ -131,7 +135,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
         startTime: startTime.toNumber(),
         price: price.toNumber(),
         buyer: web3.toUtf8(buyer),
-        productCondition: PRODUCT_CONDITION[productCondition],
+        productCondition: PRODUCT_CONDITION[productCondition.toNumber()],
         productState: PRODUCT_STATE[productState],
       };
 
@@ -153,6 +157,7 @@ let getCommonData = async function(authenticationInstance, coinbase){
     try{
       let [ storeAddress, name, email, arbiter, storeFrontImage, balance, productCount] = await ecommerce.storesById.call(i);
       let obj = {
+        id: i,
         storeAddress: web3.toUtf8(storeAddress),
         name: web3.toUtf8(name),
         email: web3.toUtf8(email),
@@ -175,23 +180,36 @@ let getCommonData = async function(authenticationInstance, coinbase){
     try{
       let product = CommonObj.payload.productData[i];
       if(product && PRODUCT_CONDITION[product.productCondition] != "ForSale" && PRODUCT_CONDITION[product.productCondition] != "Deleted" ){
-        let [buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(i);
+        let [buyer, seller, arbiter, amount, fundsDisbursed, releaseCount, refundCount] = await authenticationInstance.escrowDetails(product.id);
         let escrowobj = {
           product_id: product.id,
           buyer: buyer,
+          buyer_id: -1,
           seller: seller,
+          seller_id: -1,
           arbiter: arbiter,
+          arbiter_id: -1,
+          amount: amount.toNumber(),
           fundsDisbursed: fundsDisbursed,
-          releaseCount: releaseCount,
-          refundCount: refundCount          
+          releaseCount: releaseCount.toNumber(),
+          refundCount: refundCount.toNumber()          
         };
         console.log("***********  store obj: ", escrowobj);
         CommonObj.payload.escrowData.push(escrowobj);
       }
     }catch(err){
+      console.log("missing escrow data ", i);
       console.log("error ", err);
       continue;
     }
+  }
+
+  //change some address values to ID
+  for(let i = 1; i < CommonObj.payload.escrowData.length; i++){
+    CommonObj.payload.escrowData[i].buyer_id = findUserIDByAddress(CommonObj.payload.userData, CommonObj.payload.escrowData[i].buyer);
+    CommonObj.payload.escrowData[i].seller_id = findUserIDByAddress(CommonObj.payload.userData, CommonObj.payload.escrowData[i].seller);
+    CommonObj.payload.escrowData[i].arbiter_id = findUserIDByAddress(CommonObj.payload.userData, CommonObj.payload.escrowData[i].arbiter);
+    console.log(CommonObj.payload.escrowData[i]);
   }
 
   return CommonObj;
@@ -240,17 +258,22 @@ export function loginUser() {
             };
             console.log(obj);
             dispatch(userLoggedIn(obj));
-            // if( obj.userType === "Buyer"){
-            //   //dispatch(userLoggedIn(obj));
-            // }else if( obj.userType === "Seller"){
-            //   //dispatch(userLoggedIn(obj));
-            // }else if( obj.userType === "Arbiter"){
-            //   //dispatch(userLoggedIn(obj));
-            // }else if( obj.userType === "Owner"){
-            //   //dispatch(userLoggedIn(obj));
-            // }
+            
             return getCommonData(authenticationInstance, coinbase);
-          }).then(function(result){ //finshed getting product
+          }).then(function(result){ //finshed getting сommon data
+            // now get some role specific data
+            if( obj.userType === "Buyer"){
+            }else if( obj.userType === "Seller"){
+              for(let i = 1; i < result.storeData.length; i++){
+                if( result.storeData[i].storeAddress == coinbase ){
+                  result.myStoreID = result.storeData[i].id;
+                  break;
+                }
+              }
+            }else if( obj.userType === "Arbiter"){
+            }else if( obj.userType === "Owner"){
+            }
+
             if(result)  dispatch(result);
 
             // Used a manual redirect here as opposed to a wrapper.

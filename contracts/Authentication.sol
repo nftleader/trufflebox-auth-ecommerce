@@ -297,7 +297,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         bool addStoreResult = ecommerce.addStore(_name, _email, _arbiter, _storeImage, msg.sender);
         if(addStoreResult)
         {
-            sellersCount = sellersCount.add(1);
+            sellersCount = sellersCount.add(1); //???
             sellersById[sellersCount] = msg.sender;
             emit LogCreateStore("New store created", msg.sender, msg.sender);
         }

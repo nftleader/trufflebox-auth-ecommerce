@@ -1,6 +1,19 @@
 const Authentication = artifacts.require('./Authentication.sol');
 const Ecommerce = artifacts.require('./Ecommerce.sol');
 
+function displayEscrowData(__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount){
+	let escrowobj = {
+		buyer: __buyer,
+		seller: __seller,
+		arbiter: __arbiter,
+		amount: __amount.toNumber(),
+		fundsDisbursed: __fundsDisbursed,
+		releaseCount: __releaseCount.toNumber(),
+		refundCount: __refundCount.toNumber()
+	};
+	console.log("***********  escrow obj: ", escrowobj);
+}
+
 contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 	let authentication;
 	let ecommerce;
@@ -21,7 +34,7 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 		console.log('ecommerce.address     : ', ecommerce.address);
 		console.log('authentication.address: ', authentication.address);
 	});
-
+/*
 	it('contract has an owner', async () => {
 		assert.equal(await authentication.owner(), owner);
 	});
@@ -130,8 +143,26 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 		);
 		assert.equal(expectedUserState, userState.c[0], 'Arbiter not approved');
 	});
+*/
 
 	it('create/aprove Seller and let him create a Store', async () => {
+		{
+			const expectedName = 'Buyer';
+			const expectedEmail = 'buyer@test.com';
+			const expetectPhoneNumber = '123456789';
+			const expectedProfilePicture = 'image';
+			const expectedUserType = 0; // Buyer
+			const expectedUserState = 1; // Approved
+	
+			await authentication.signup(
+				expectedName,
+				expectedEmail,
+				expetectPhoneNumber,
+				expectedProfilePicture,
+				expectedUserType,
+				{ from: buyer }
+			);
+		}
 		let expectedName = 'Authorized Seller';
 		let expectedEmail = 'seller@test.com';
 		let expetectPhoneNumber = '987654321';
@@ -187,9 +218,88 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 
 		const sellerAddress = await authentication.sellersById.call(1);
 		assert.equal(sellerAddress, seller, 'Store not created');
-	});
 
-	it('list users', async () => {
+		console.log("------ add product")
+		{
+			await ecommerce.addProduct("first product", "first", 1234, web3.toWei(5, "ether"), 0, {from: seller});
+		}
+		console.log("------ get product")
+		{
+			let productCount = (await ecommerce.productCount.call()).toNumber();
+			let [_id, _name, _category, _startTime, _price, _buyer, _condition, _productState] = await ecommerce.getProduct.call(productCount, {from: seller});
+			let productobj = {
+				_id: _id.toNumber(),
+				_name: web3.toUtf8(_name),
+				_category: web3.toUtf8(_category),
+				_startTime: _startTime.toNumber(),
+				_price: _price.toNumber(),
+				_buyer: web3.toUtf8(_buyer),
+				_condition: _condition.toNumber(),
+				_productState: _productState.toNumber(),
+			}
+			console.log(productobj);
+		}
+
+		console.log("------ buy product")
+		let productCount = (await ecommerce.productCount.call()).toNumber();
+			console.log("product count: ", productCount, "buyer:", buyer );
+		{
+			await ecommerce.buyProduct(productCount, {from:buyer, value: web3.toWei(6, "ether")});
+
+			let [_id, _name, _category, _startTime, _price, _buyer, _condition, _productState] = await ecommerce.getProduct.call(productCount);
+			let productobj = {
+				_id: _id.toNumber(),
+				_name: web3.toUtf8(_name),
+				_category: web3.toUtf8(_category),
+				_startTime: _startTime.toNumber(),
+				_price: _price.toNumber(),
+				_buyer: _buyer,
+				_condition: _condition.toNumber(),
+				_productState: _productState.toNumber(),
+			}
+			console.log(productobj);
+
+			//get escrow
+			let [__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount] = await ecommerce.escrowDetails(productCount);
+			displayEscrowData(__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount);
+		}
+
+		await ecommerce.releaseAmountToSeller(productCount, {from:buyer});
+		{
+			let [__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount] = await ecommerce.escrowDetails(productCount);
+			displayEscrowData(__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount);
+		}
+
+		await ecommerce.releaseAmountToSeller(productCount, {from:seller});
+		{
+			let [__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount] = await ecommerce.escrowDetails(productCount);
+			displayEscrowData(__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount);
+		}
+
+		//withdraw
+		await ecommerce.withdraw(productCount, {from:seller});
+		{
+			let [__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount] = await ecommerce.escrowDetails(productCount);
+			displayEscrowData(__buyer, __seller, __arbiter, __amount, __fundsDisbursed,__releaseCount, __refundCount);
+		}
+
+		await web3.eth.getBalance(owner, function(err, res) {
+			console.log("owner balance :" + res.toString(10)); // because you get a BigNumber
+		});
+		await web3.eth.getBalance(buyer, function(err, res) {
+			console.log("buyer balance :" + res.toString(10)); // because you get a BigNumber
+	   	});
+		await web3.eth.getBalance(seller, function(err, res) {
+			console.log("seller balance :" + res.toString(10)); // because you get a BigNumber
+		});
+		await web3.eth.getBalance(arbiter, function(err, res) {
+			console.log("arbiter balance :" + res.toString(10)); // because you get a BigNumber
+	   	});
+
+	});
+	
+
+/*	it('list users', async () => {
 		//let expectedName = '0x12e18';
 		let expectedName = 'asdfasdfasdf';
 		let expectedEmail = 'seller@test.com';
@@ -230,4 +340,5 @@ contract('Authentication', async ([ owner, buyer, seller, arbiter ]) => {
 		}
 		assert.equal(obj.name, expectedName, 'Failed on list users');
 	});
+*/
 });

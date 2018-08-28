@@ -48,8 +48,8 @@ contract Escrow  {
     }
     
     
-    function escrowDetails() public view returns (address, address, address, bool, uint, uint) {
-        return (buyer, seller, arbiter, fundsDisbursed, releaseCount, refundCount);
+    function escrowDetails() public view returns (address, address, address, uint, bool, uint, uint) {
+        return (buyer, seller, arbiter, this.balance, fundsDisbursed, releaseCount, refundCount);
         
     }
     
