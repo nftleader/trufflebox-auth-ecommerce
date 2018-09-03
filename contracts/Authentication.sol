@@ -28,10 +28,10 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     enum UserType {Buyer, Seller, Arbiter, Owner}
     enum UserState {Pending, Approved}
     struct User {
-        bytes32 name;
-        bytes32 email;
-        bytes32 phoneNumber;
-        bytes32 profilePicture;
+        string name;
+        string email;
+        string phoneNumber;
+        string profilePicture;
         UserType userType;
         UserState userState;
         bool exists;
@@ -48,10 +48,10 @@ contract Authentication is Ownable, Killable, ReentryProtector {
 
     modifier onlyExistingUser(address user) { require(users[user].exists, "User is not registered"); _; }
     modifier onlyExistingUserID(uint userid) { require(usersById[userid] != 0, "User ID is not registered"); _; }
-    modifier onlyValidName(bytes32 name) { require(name.length > 0, "Invalid name"); _; }
-    modifier onlyValidEmail(bytes32 email) { require(!(email == 0x0), "Invalid email"); _; }
-    modifier onlyValidPhone(bytes32 phoneNumber) { require(!(phoneNumber == 0x0), "Invalid phone number"); _; }
-    modifier onlyValidProfilePicture(bytes32 profilePicture) { require(!(profilePicture == 0x0), "Invalid profile picture"); _; }
+    modifier onlyValidName(string name) { require(bytes(name).length != 0, "Invalid name"); _; }
+    modifier onlyValidEmail(string email) { require(bytes(email).length != 0, "Invalid email"); _; }
+    modifier onlyValidPhone(string phoneNumber) { require(bytes(phoneNumber).length != 0, "Invalid phone number"); _; }
+    modifier onlyValidProfilePicture(string profilePicture) { require(bytes(profilePicture).length != 0, "Invalid profile picture"); _; }
     modifier onlyPendingState(address user) { require( users[user].userState == UserState.Pending, "User not on Pending state."); _; }
     modifier onlyApprovedState() { require( users[msg.sender].userState == UserState.Approved, "User not on Approved state."); _; }
     modifier onlySeller { require(users[msg.sender].userType == UserType.Seller, "User is not an seller."); _; }
@@ -72,7 +72,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         external
         view
         onlyExistingUser(msg.sender)
-        returns (bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
+        returns (string, string, string, string, UserType, UserState) 
     {
         if (users[msg.sender].exists) {
             return (
@@ -87,17 +87,17 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         if (owner == msg.sender) 
         {
             return (
-                stringToBytes32("Owner"),
-                stringToBytes32("owner@owner.com"),
-                stringToBytes32("12345678"),
-                stringToBytes32("ownerImage"),
+                "Owner",
+                "owner@owner.com",
+                "12345678",
+                "ownerImage",
                 UserType.Owner,
                 UserState.Approved
             );
         } 
     }
 
-    /** @dev convert strint to bytes32
+    /** @dev convert strint to string
      */
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
@@ -140,17 +140,18 @@ contract Authentication is Ownable, Killable, ReentryProtector {
 
         if (users[msg.sender].exists)  return 0;   //exisitng user
 
+        require(bytes(_name).length > 0, "Invalid name");
+        require(bytes(_email).length > 0, "Invalid email");
+        require(bytes(_phoneNumber).length > 0, "Invalid phoneNumber");
+        require(bytes(_profilePicture).length > 0, "Invalid profilePicture");
+
         externalEnter();
         User memory newbie;
-        newbie.name = stringToBytes32(_name);
-        newbie.email = stringToBytes32(_email);
-        newbie.phoneNumber = stringToBytes32(_phoneNumber);
-        newbie.profilePicture = stringToBytes32(_profilePicture);
+        newbie.name = _name;
+        newbie.email = _email;
+        newbie.phoneNumber = _phoneNumber;
+        newbie.profilePicture = _profilePicture;
         
-        require(newbie.name.length > 0, "Invalid name");
-        require(newbie.email.length > 0, "Invalid email");
-        require(newbie.phoneNumber.length > 0, "Invalid phoneNumber");
-        require(newbie.profilePicture.length > 0, "Invalid profilePicture");
         
         newbie.userType = _userType;
         newbie.exists = true;
@@ -176,11 +177,12 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     /** @dev update user data
     *
     */
+    /*
     function update(
-        bytes32 _name,
-        bytes32 _email,
-        bytes32 _phoneNumber,
-        bytes32 _profilePicture
+        string _name,
+        string _email,
+        string _phoneNumber,
+        string _profilePicture
     )
         external
         payable
@@ -189,7 +191,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         onlyValidPhone(_phoneNumber)
         onlyValidProfilePicture(_profilePicture)
         onlyExistingUser(msg.sender)
-        returns (bytes32, bytes32, bytes32, bytes32) 
+        returns (string, string, string, string) 
     {
         externalEnter();
         emit LogUserUpdated(msg.sender);
@@ -206,7 +208,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
             users[msg.sender].profilePicture
         );
     }
-
+*/
 
     /** @dev Update user State {Pending, Approved}
         * @param _userAddress user address to update
@@ -277,9 +279,9 @@ contract Authentication is Ownable, Killable, ReentryProtector {
       * @return contract address of the store just created and next store number
       */    
     function createStore(
-        bytes32 _name, 
-        bytes32 _email, 
-        bytes32 _storeImage,
+        string _name, 
+        string _email, 
+        string _storeImage,
         address _arbiter
     ) 
         external 
@@ -314,7 +316,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         external
         view
         onlyExistingUserID(_id)
-        returns ( address, bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
+        returns ( address, string, string, string, string, UserType, UserState) 
     {
         User memory user = users[usersById[_id]]; // load product from memory
         return (

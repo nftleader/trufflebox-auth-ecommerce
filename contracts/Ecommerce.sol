@@ -12,10 +12,10 @@ contract Ecommerce is Ownable, ReentryProtector {
     using SafeMath for uint256;
 
     function  addStore(
-        bytes32 _name, 
-        bytes32 _email,
+        string _name, 
+        string _email,
         address _arbiter,
-        bytes32 _storeFrontImage,
+        string _storeFrontImage,
         address _sellerAddress
     )
         external 
@@ -52,10 +52,10 @@ contract Ecommerce is Ownable, ReentryProtector {
 
     struct Store {
         address storeAddress;
-        bytes32 name;
-        bytes32 email;
+        string name;
+        string email;
         address arbiter;
-        bytes32 storeFrontImage;
+        string storeFrontImage;
         uint balance;
         uint productCount;
     }
@@ -64,10 +64,10 @@ contract Ecommerce is Ownable, ReentryProtector {
     enum ProductState {ForSale, Sold, Shipped, Received, Deleted}
     struct Product {
         uint id;
-        bytes32 name;//
-        bytes32 category;//
-        bytes32 imageLink;//
-        bytes32 descLink;//
+        string name;//
+        string category;//
+        string imageLink;//
+        string descLink;//
         uint startTime;//
         uint price;//
         address buyer;
@@ -84,10 +84,10 @@ contract Ecommerce is Ownable, ReentryProtector {
         require(storesById[storesBySellers[msg.sender]].storeAddress == msg.sender, "You are not the store owner!" ); 
         _;
     }
-    modifier requireProductName(bytes32 _name) { require(!(_name == 0x0), "Product name is mandatory"); _;}
-    modifier requireProductCategory(bytes32 _productCategory) { require(!(_productCategory == 0x0), "Product category is mandatory"); _;}
-    modifier requireDescLink(bytes32 _descLink) { require(!(_descLink == 0x0), "Product description is mandatory"); _;}
-    modifier requireImageLink(bytes32 _imageLink) { require(!(_imageLink == 0x0), "Product image is mandatory"); _;}
+    modifier requireProductName(string _name) { require(bytes(_name).length != 0, "Product name is mandatory"); _;}
+    modifier requireProductCategory(string _productCategory) { require(bytes(_productCategory).length != 0, "Product category is mandatory"); _;}
+    modifier requireDescLink(string _descLink) { require(bytes(_descLink).length != 0, "Product description is mandatory"); _;}
+    modifier requireImageLink(string _imageLink) { require(bytes(_imageLink).length != 0, "Product image is mandatory"); _;}
     modifier requireStartTime(uint _startTime) { require(_startTime > 0 , "Listing start time is mandatory"); _;}
     modifier requirePrice(uint _price) { require(_price > 0 , "Product price is mandatory"); _;}
     modifier productExists(uint _id) { require( stores[storesByProductId[_id]][_id].exists, "Product not found."); _; }
@@ -127,18 +127,18 @@ contract Ecommerce is Ownable, ReentryProtector {
     }
 
     
-    event LogProductRemoved(bytes32 message, uint productCount);
+    event LogProductRemoved(string message, uint productCount);
     event LogDonnationReceived(address sender, uint value);
-    event LogForSale(bytes32 message, uint id);
-    event LogSold(bytes32 message, uint id);
-    event LogShipped(bytes32 message, uint id);
-    event LogReceived(bytes32 message, uint id);
-    event LogCheckValue(bytes32 message, uint _amount);
+    event LogForSale(string message, uint id);
+    event LogSold(string message, uint id);
+    event LogShipped(string message, uint id);
+    event LogReceived(string message, uint id);
+    event LogCheckValue(string message, uint _amount);
     event LogEscrowCreated(uint id, address buyer, address seller, address arbiter);
-    event LogReleaseAmountToSeller(bytes32 message, uint productId, address caller);
-    event LogRefundAmountToBuyer(bytes32 message, uint productId, address caller);
-    event LogWithdraw(bytes32 message, uint productId, address caller);
-    event LogProductUpdated(bytes32 message, uint productId);
+    event LogReleaseAmountToSeller(string message, uint productId, address caller);
+    event LogRefundAmountToBuyer(string message, uint productId, address caller);
+    event LogWithdraw(string message, uint productId, address caller);
+    event LogProductUpdated(string message, uint productId);
 
 
    /** @dev Add product to stores mapping - imageLink and descLink are initialized with blanks,
@@ -151,8 +151,8 @@ contract Ecommerce is Ownable, ReentryProtector {
       * @return product index
       */    
     function addProduct(
-        bytes32 _name, 
-        bytes32 _category, 
+        string _name, 
+        string _category, 
         uint _startTime, 
         uint _price, 
         uint _productCondition
@@ -198,7 +198,7 @@ contract Ecommerce is Ownable, ReentryProtector {
       */    
     function updateProductImage(
         uint _id,
-        bytes32 _imageLink
+        string _imageLink
     ) 
         external 
         onlyStoreOwner
@@ -217,7 +217,7 @@ contract Ecommerce is Ownable, ReentryProtector {
       */    
     function updateProductDesc(
         uint _id,
-        bytes32 _descLink
+        string _descLink
     ) 
         external 
         onlyStoreOwner
@@ -258,8 +258,8 @@ contract Ecommerce is Ownable, ReentryProtector {
         view 
         returns(
             uint id, 
-            bytes32 name, 
-            bytes32 category, 
+            string name, 
+            string category, 
             uint startTime, 
             uint price, 
             address buyer, 
@@ -290,8 +290,8 @@ contract Ecommerce is Ownable, ReentryProtector {
         productExists(_id)
         view 
         returns(
-            bytes32 imageLink, 
-            bytes32 descLink
+            string imageLink, 
+            string descLink
         ) 
     {
         Product memory product = stores[storesByProductId[_id]][_id]; // load product from memory
@@ -309,22 +309,31 @@ contract Ecommerce is Ownable, ReentryProtector {
     function buyProduct(uint _id) 
         external 
         payable 
-        productExists(_id)
-        forSale(_id)
-        paidEnough(stores[storesByProductId[_id]][_id].price)
-        checkValue(_id)
-
+//        productExists(_id)
+//        forSale(_id)
+//        paidEnough(stores[storesByProductId[_id]][_id].price)
+//        checkValue(_id)
     {
         
         externalEnter();
 
-        stores[storesByProductId[_id]][_id].buyer = msg.sender;
-        stores[storesByProductId[_id]][_id].productState = ProductState.Sold;
+        address storeAddress = storesByProductId[_id];
+        Product memory product = stores[storeAddress][_id];
+        product.buyer = msg.sender;
+        product.productState = ProductState.Sold;
         emit LogSold("Product sold", _id);
 
         //function initEscrow(uint _id, uint _value, address _buyer)
         
-        initEscrow(_id, stores[storesByProductId[_id]][_id].price, msg.sender); // create Escrow contract       
+        //initEscrow(_id, stores[storesByProductId[_id]][_id].price, msg.sender); // create Escrow contract       
+        Escrow escrow = (new Escrow).value(product.price)(
+            _id, 
+            product.buyer,
+            storeAddress,  //seller
+            storesById[storesBySellers[storeAddress]].arbiter //load arbiter from the Store
+        );
+        productsEscrow[_id] = escrow;
+        stores[storeAddress][_id] = product;
         
         externalLeave();
     }
