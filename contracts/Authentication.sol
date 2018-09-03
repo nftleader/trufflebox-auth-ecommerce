@@ -46,7 +46,7 @@ contract Authentication is Ownable, Killable, ReentryProtector {
     uint public usersCount;  
     uint public sellersCount;   
 
-    modifier onlyExistingUser(address user) { require(users[user].exists, "User is not registered"); _; }
+    modifier onlyExistingUser(address user) { require( owner == msg.sender || users[user].exists, "User is not registered"); _; }
     modifier onlyExistingUserID(uint userid) { require(usersById[userid] != 0, "User ID is not registered"); _; }
     modifier onlyValidName(bytes32 name) { require(name.length > 0, "Invalid name"); _; }
     modifier onlyValidEmail(bytes32 email) { require(!(email == 0x0), "Invalid email"); _; }
@@ -74,16 +74,6 @@ contract Authentication is Ownable, Killable, ReentryProtector {
         onlyExistingUser(msg.sender)
         returns (bytes32, bytes32, bytes32, bytes32, UserType, UserState) 
     {
-        if (users[msg.sender].exists) {
-            return (
-                    users[msg.sender].name,
-                    users[msg.sender].email,
-                    users[msg.sender].phoneNumber,
-                    users[msg.sender].profilePicture,
-                    users[msg.sender].userType,
-                    users[msg.sender].userState
-                );
-        }
         if (owner == msg.sender) 
         {
             return (
@@ -95,6 +85,15 @@ contract Authentication is Ownable, Killable, ReentryProtector {
                 UserState.Approved
             );
         } 
+
+        return (
+            users[msg.sender].name,
+            users[msg.sender].email,
+            users[msg.sender].phoneNumber,
+            users[msg.sender].profilePicture,
+            users[msg.sender].userType,
+            users[msg.sender].userState
+        );
     }
 
     /** @dev convert strint to bytes32

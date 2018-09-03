@@ -4,7 +4,7 @@ import { routerActions } from 'react-router-redux'
 // Layout Component Wrappers
 
 export const UserIsAuthenticated = UserAuthWrapper({
-  authSelector: state => state.user.data.userType !== null,
+  authSelector: state => state.user.data.userType,
   redirectAction: routerActions.replace,
   failureRedirectPath: '/signup', // '/login' by default.
   wrapperDisplayName: 'UserIsAuthenticated',
